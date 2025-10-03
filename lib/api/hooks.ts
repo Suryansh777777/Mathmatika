@@ -1,17 +1,18 @@
 import { useMutation, type UseMutationOptions } from "@tanstack/react-query";
 import { apiClient } from "./client";
-import type { paths } from "./schema";
+import type { operations } from "./schema";
 
 /**
  * Type definitions for API requests and responses (strictly from OpenAPI schema)
  */
-type ResearchRequest = paths["/research"]["post"]["parameters"]["body"];
+type ResearchRequest =
+  operations["research_topic_research_post"]["requestBody"]["content"]["application/json"];
 type ResearchResponse =
-  paths["/research"]["post"]["responses"][200]["content"]["application/json"];
+  operations["research_topic_research_post"]["responses"][200]["content"]["application/json"];
 type DeepResearchResponse =
-  paths["/deep-research"]["post"]["responses"][200]["content"]["application/json"];
+  operations["deeper_research_topic_deep_research_post"]["responses"][200]["content"]["application/json"];
 type MultiAgentResearchResponse =
-  paths["/multi-agent-research"]["post"]["responses"][200]["content"]["application/json"];
+  operations["anthropic_multiagent_research_multi_agent_research_post"]["responses"][200]["content"]["application/json"];
 
 /**
  * Hook for basic research endpoint
@@ -32,7 +33,7 @@ export function useResearch(
   return useMutation({
     mutationFn: async (request: ResearchRequest) => {
       const { data, error } = await apiClient.POST("/research", {
-        params: { body: request },
+        body: request,
       });
 
       if (error) {
@@ -67,7 +68,7 @@ export function useDeepResearch(
   return useMutation({
     mutationFn: async (request: ResearchRequest) => {
       const { data, error } = await apiClient.POST("/deep-research", {
-        params: { body: request },
+        body: request,
       });
 
       if (error) {
@@ -109,7 +110,7 @@ export function useMultiAgentResearch(
   return useMutation({
     mutationFn: async (request: ResearchRequest) => {
       const { data, error } = await apiClient.POST("/multi-agent-research", {
-        params: { body: request },
+        body: request,
       });
 
       if (error) {
