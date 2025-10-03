@@ -1,10 +1,12 @@
 import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from exa_py import Exa
 from cerebras.cloud.sdk import Cerebras
+from pathlib import Path
 
 # Load environment variables from .env file
 load_dotenv()
@@ -23,12 +25,16 @@ client = Cerebras(api_key=CEREBRAS_API_KEY)
 
 app = FastAPI(
     title="Mathematiks Research API",
-    description="AI-powered research API with multi-agent capabilities",
+    description="AI-powered research API with multi-agent capabilities and Manim visualization",
     version="1.0.0",
     openapi_tags=[
         {
             "name": "research",
             "description": "Research endpoints with varying depth and strategies"
+        },
+        {
+            "name": "manim",
+            "description": "Manim animation generation for mathematical concepts"
         }
     ]
 )
@@ -41,6 +47,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Import and include Manim router
+try:
+    # Try absolute import first (when running as module)
+    from src.manim import router as manim_router
+except ImportError:
+    try:
+        # Try relative import (when running from src directory)
+        from manim import router as manim_router
+    except ImportError:
+        # If both fail, manim module might not be available
+        manim_router = None
+        print("Warning: Manim module not found. Manim endpoints will not be available.")
+
+if manim_router:
+    app.include_router(manim_router)
+
+# Mount static files for video serving (if directory exists)
+static_dir = Path(__file__).parent.parent / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Request/Response Models
 class ResearchRequest(BaseModel):

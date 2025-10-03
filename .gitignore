@@ -53,3 +53,6 @@ openapi.json
 # Python virtual environments
 api/.venv
 api/venv
+
+# Manim videos
+*.mp4
