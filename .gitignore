@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env
+.env.local
+.env*.local
+api/.env
 
 # vercel
 .vercel
@@ -43,3 +46,10 @@ next-env.d.ts
 # pycache
 __pycache__/
 *.pyc
+
+# OpenAPI generated files
+openapi.json
+
+# Python virtual environments
+api/.venv
+api/venv

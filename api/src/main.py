@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from exa_py import Exa
 from cerebras.cloud.sdk import Cerebras
@@ -20,10 +21,41 @@ if not EXA_API_KEY or not CEREBRAS_API_KEY:
 exa = Exa(api_key=EXA_API_KEY)
 client = Cerebras(api_key=CEREBRAS_API_KEY)
 
-app = FastAPI()
+app = FastAPI(
+    title="Mathematiks Research API",
+    description="AI-powered research API with multi-agent capabilities",
+    version="1.0.0",
+    openapi_tags=[
+        {
+            "name": "research",
+            "description": "Research endpoints with varying depth and strategies"
+        }
+    ]
+)
 
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Next.js dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Request/Response Models
 class ResearchRequest(BaseModel):
+    query: str = Field(..., description="Research query or question", min_length=3)
+
+class ResearchResponse(BaseModel):
     query: str
+    sources: int
+    response: str
+
+class MultiAgentResearchResponse(BaseModel):
+    query: str
+    subagents: int
+    total_sources: int
+    synthesis: str
 
 # Web Search Function
 def search_web(query: str, num_results: int = 5):
@@ -59,9 +91,15 @@ def ask_ai(prompt: str):
         raise HTTPException(status_code=500, detail=f"Cerebras API error: {e}")
 
 # Research Function
-@app.post("/research")
+@app.post("/research", response_model=ResearchResponse, tags=["research"])
 def research_topic(request: ResearchRequest):
-    """Main research function that orchestrates the entire process"""
+    """
+    Basic research with AI synthesis
+
+    - Searches 5 web sources
+    - Returns 2-3 sentence summary
+    - Provides 3 key insights
+    """
     query = request.query
     print(f"🔍 Researching: {query}")
 
@@ -89,6 +127,7 @@ def research_topic(request: ResearchRequest):
     context = f"Research query: {query}\n\nSources:\n"
     for i, source in enumerate(sources[:4], 1):
         context += f"{i}. {source['title']}: {source['content'][:400]}...\n\n"
+        
 
     # Ask AI to analyze and synthesize
     prompt = f"""{context}
@@ -111,9 +150,16 @@ INSIGHTS:
     return {"query": query, "sources": len(sources), "response": response}
 
 # Deeper Research Function
-@app.post("/deep-research")
+@app.post("/deep-research", response_model=ResearchResponse, tags=["research"])
 def deeper_research_topic(request: ResearchRequest):
-    """Two-layer research for better depth"""
+    """
+    Two-layer research for better depth
+
+    - Layer 1: Initial search (6 sources)
+    - AI identifies follow-up question
+    - Layer 2: Follow-up search (4 sources)
+    - Final synthesis with depth analysis
+    """
     query = request.query
     print(f"🔍 Researching: {query}")
 
@@ -175,13 +221,16 @@ DEPTH GAINED: [1 sentence on how the follow-up search enhanced understanding]"""
     return {"query": query, "sources": len(sources), "response": response}
 
 # Multi-Agent Research Function
-@app.post("/multi-agent-research")
+@app.post("/multi-agent-research", response_model=MultiAgentResearchResponse, tags=["research"])
 def anthropic_multiagent_research(request: ResearchRequest):
     """
-    Simple implementation of Anthropic's multi-agent approach:
-    1. Lead agent plans and delegates
-    2. Specialized subagents work in parallel
-    3. Lead agent synthesizes results
+    Multi-agent research with parallel execution
+
+    - Lead agent decomposes query into 3 subtasks
+    - 3 specialized subagents work in parallel
+    - Each subagent searches 2 sources
+    - Lead agent synthesizes all findings
+    - Returns executive summary and integrated insights
     """
     query = request.query
     print(f"🤖 Anthropic Multi-Agent Research: {query}")

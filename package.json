@@ -4,14 +4,22 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:api": "cd api && uvicorn src.main:app --reload --host 0.0.0.0 --port 8000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "openapi:fetch": "curl http://localhost:8000/openapi.json -o openapi.json",
+    "openapi:generate": "openapi-typescript openapi.json -o ./lib/api/schema.ts",
+    "openapi": "bun run openapi:fetch && bun run openapi:generate"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.2",
+    "@tanstack/react-query-devtools": "^5.90.2",
+    "next": "15.4.4",
+    "openapi-fetch": "^0.14.1",
+    "openapi-typescript": "^7.9.1",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "next": "15.4.4"
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
     "typescript": "^5",
