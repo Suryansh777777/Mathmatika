@@ -11,7 +11,7 @@ export const siteConfig = {
       { name: "Pricing", href: "#pricing" },
       { name: "How it Works", href: "#docs" },
     ],
-    cta: { text: "Get Started", href: "/learn" },
+    cta: { text: "Get Started", href: "/chat" },
   },
 
   // Hero Section
@@ -24,7 +24,7 @@ export const siteConfig = {
     description:
       "Upload your materials and get AI-generated notes with LaTeX and educational videos in one workflow.",
     cta: {
-      primary: { text: "Start Learning", href: "/learn" },
+      primary: { text: "Start Learning", href: "/chat" },
     },
     dashboard: {
       images: [
@@ -34,7 +34,7 @@ export const siteConfig = {
         },
         {
           src: "/analytics-dashboard-with-charts-graphs-and-data-vi.jpg",
-          alt: "Interactive Quiz Interface",
+          alt: "Interactive Video Interface",
         },
         {
           src: "/data-visualization-dashboard-with-interactive-char.jpg",
@@ -111,7 +111,7 @@ export const siteConfig = {
       {
         title: "Multi-format Support",
         description:
-          "Upload PDFs, images, handwritten notes, or text—our AI understands them all without OCR hassles.",
+          "Upload PDFs, images,  or text—our AI understands them all without OCR hassles.",
         component: "EffortlessIntegration",
       },
       {
@@ -270,7 +270,7 @@ export const siteConfig = {
       {
         question: "Do I need to convert images to text (OCR)?",
         answer:
-          "No! Mathmatika handles images directly without OCR. Just upload photos of textbook pages, handwritten notes, or problem sets, and our AI processes them as-is.",
+          "No! Mathmatika handles images directly without OCR. Just upload photos of textbook pages,  or problem sets, and our AI processes them as-is.",
       },
       {
         question: "How does the AI mentorship Q&A work?",
@@ -295,7 +295,7 @@ export const siteConfig = {
     title: "Ready to master mathematics?",
     description:
       "Join thousands of students learning smarter with AI-powered notes,\nvideos, and quizzes—all generated from your materials.",
-    button: { text: "Start Learning Free", href: "/learn" },
+    button: { text: "Start Learning Free", href: "/chat" },
   },
 
   // Footer

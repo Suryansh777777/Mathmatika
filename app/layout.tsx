@@ -2,6 +2,7 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+import { Providers } from "@/providers/providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,10 +20,9 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Brillance - Effortless Custom Contract Billing",
+  title: "Mathmatika - AI-Powered Mathematics Learning",
   description:
-    "Streamline your billing process with seamless automation for every custom contract, tailored by Brillance.",
-  generator: "v0.app",
+    "Transform your math materials into comprehensive study aids with AI-powered notes, videos, and interactive quizzes",
 };
 
 export default function RootLayout({
@@ -35,7 +35,9 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${instrumentSerif.variable} antialiased`}
     >
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
