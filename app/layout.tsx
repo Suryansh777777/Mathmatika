@@ -1,35 +1,41 @@
+import type React from "react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
-import { Providers } from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  preload: true,
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
+  variable: "--font-instrument-serif",
+  weight: ["400"],
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
-  title: "Mathematiks - AI Research Assistant",
-  description: "AI-powered research with multi-agent capabilities",
+  title: "Brillance - Effortless Custom Contract Billing",
+  description:
+    "Streamline your billing process with seamless automation for every custom contract, tailored by Brillance.",
+  generator: "v0.app",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Providers>{children}</Providers>
-      </body>
+    <html
+      lang="en"
+      className={`${inter.variable} ${instrumentSerif.variable} antialiased`}
+    >
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }
