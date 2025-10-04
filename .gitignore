@@ -38,7 +38,7 @@ api/.env
 
 # vercel
 .vercel
-
+*.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts

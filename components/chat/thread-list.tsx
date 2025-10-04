@@ -73,7 +73,11 @@ function groupThreadsByPeriod(threads: Thread[]): GroupedThreads[] {
   return orderedGroups;
 }
 
-export default function ThreadList() {
+interface ThreadListProps {
+  searchQuery?: string;
+}
+
+export default function ThreadList({ searchQuery = "" }: ThreadListProps) {
   const [threads, setThreads] = useState<Thread[]>([]);
 
   // TODO: Replace with actual data fetching from your backend
@@ -96,52 +100,54 @@ export default function ThreadList() {
     setThreads(mockThreads);
   }, []);
 
-  const groupedThreads = groupThreadsByPeriod(threads);
+  // Filter threads based on search query
+  const filteredThreads = threads.filter((thread) =>
+    thread.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const groupedThreads = groupThreadsByPeriod(filteredThreads);
 
   return (
     <div className="relative flex-1">
+      {groupedThreads.length === 0 && searchQuery && (
+        <div className="flex flex-col items-center justify-center py-8 px-4 text-center animate-slide-up">
+          <p className="text-sm text-[#8b7d70]">No threads found</p>
+          <p className="text-xs text-[#8b7d70]/60 mt-1">Try a different search term</p>
+        </div>
+      )}
       {groupedThreads.map((group) => (
         <Collapsible
           key={group.period}
           defaultOpen
-          className="group/collapsible"
+          className="group/collapsible animate-slide-up"
         >
           <SidebarGroup>
-            <SidebarGroupLabel className="select-none px-1.5 text-heading" asChild>
-              <CollapsibleTrigger>
-                <span className="text-[#37322f] font-medium">{group.period}</span>
+            <SidebarGroupLabel className="select-none px-2 py-1.5 text-heading hover:bg-[#e8e4df]/30 rounded-md transition-colors duration-150" asChild>
+              <CollapsibleTrigger className="group/label">
+                <span className="text-[#37322f] font-semibold text-xs uppercase tracking-wider">{group.period}</span>
                 <Icon
                   name="collapse"
-                  className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90 text-[#37322f]"
+                  className="ml-auto transition-all duration-200 group-data-[state=open]/collapsible:rotate-90 text-[#8b7d70] group-hover/label:text-[#37322f] w-3.5 h-3.5"
                 />
               </CollapsibleTrigger>
             </SidebarGroupLabel>
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu className="text-sm">
-                  {group.conversations.map((conversation) => (
-                    <span className="select-none" key={conversation.id}>
+                  {group.conversations.map((conversation, index) => (
+                    <span className="select-none animate-slide-up" key={conversation.id} style={{ animationDelay: `${index * 30}ms` }}>
                       <SidebarMenuItem>
-                        <div className="group/link relative flex h-9 w-full items-center overflow-hidden rounded-lg px-2 py-1 text-sm outline-none hover:bg-[#e8e4df] focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring hover:focus-visible:bg-[#e8e4df]">
-                          <div className="relative flex w-full items-center">
-                            <Link
-                              href={`/chat/${conversation.id}`}
-                              className="w-full"
-                            >
-                              <input
-                                aria-label="Thread title"
-                                aria-describedby="thread-title-hint"
-                                aria-readonly="true"
-                                tabIndex={-1}
-                                className="hover:truncate-none h-full w-full overflow-hidden rounded bg-transparent px-1 py-1 text-sm text-[#5a5550] outline-none pointer-events-none cursor-pointer truncate"
-                                title={conversation.title}
-                                type="text"
-                                readOnly={true}
-                                value={conversation.title}
-                              />
-                            </Link>
+                        <Link
+                          href={`/chat/${conversation.id}`}
+                          className="group/link relative flex h-9 w-full items-center overflow-hidden rounded-lg px-3 py-2 text-sm outline-none hover:bg-[#e8e4df]/60 focus-visible:bg-[#e8e4df]/60 focus-visible:ring-1 focus-visible:ring-[#8b7d70]/20 active:scale-98 transition-all duration-150"
+                        >
+                          <div className="relative flex w-full items-center min-w-0">
+                            <span className="truncate text-sm text-[#5a5550] group-hover/link:text-[#37322f] transition-colors duration-150 font-medium">
+                              {conversation.title}
+                            </span>
                           </div>
-                        </div>
+                          <div className="absolute inset-y-0 left-0 w-0.5 bg-[#37322f] scale-y-0 group-hover/link:scale-y-100 transition-transform duration-200 origin-center rounded-r-full"></div>
+                        </Link>
                       </SidebarMenuItem>
                     </span>
                   ))}

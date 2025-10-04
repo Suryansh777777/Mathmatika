@@ -82,10 +82,10 @@ const getCookie = (name: string) => {
 };
 
 function SidebarProvider({
-  defaultOpen = getCookie(SIDEBAR_COOKIE_NAME) === "true",
+  defaultOpen = true,
   open: openProp,
   onOpenChange: setOpenProp,
-  defaultWidth = getCookie(SIDEBAR_WIDTH_COOKIE_NAME) || SIDEBAR_WIDTH,
+  defaultWidth = SIDEBAR_WIDTH,
   className,
   style,
   children,
@@ -96,10 +96,16 @@ function SidebarProvider({
   onOpenChange?: (open: boolean) => void;
   defaultWidth?: string;
 }) {
-  //console.log('cookie state', getCookie('sidebar_state'))
-  //console.log('cookie width', getCookie('sidebar_width'))
   const isMobile = useIsMobile();
   const [width, setWidth] = React.useState(defaultWidth);
+
+  // Initialize state from cookies on client side only
+  React.useEffect(() => {
+    const savedWidth = getCookie(SIDEBAR_WIDTH_COOKIE_NAME);
+    if (savedWidth) {
+      setWidth(savedWidth);
+    }
+  }, []);
   const [isDraggingRail, setIsDraggingRail] = React.useState(false);
   const [openMobile, setOpenMobile] = React.useState(false);
 

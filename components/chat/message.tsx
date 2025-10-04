@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/icon";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface MessageProps {
   message: string;
@@ -15,6 +15,13 @@ interface MessageProps {
 export function Message({ message, messageId, role, model }: MessageProps) {
   const isUser = role === "user";
   const [isCopied, setIsCopied] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger entrance animation
+    const timer = setTimeout(() => setIsVisible(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(message);
@@ -27,15 +34,19 @@ export function Message({ message, messageId, role, model }: MessageProps) {
   return (
     <div
       data-message-id={messageId}
-      className={cn("flex justify-start", isUser && "justify-end")}
+      className={cn(
+        "flex justify-start transition-all duration-300 opacity-0 translate-y-2",
+        isUser && "justify-end",
+        isVisible && "opacity-100 translate-y-0"
+      )}
     >
       <div
         role="article"
         aria-label={isUser ? "Your message" : "Assistant message"}
         className={cn(
-          "group relative inline-block break-words",
+          "group relative inline-block break-words transition-all duration-300",
           isUser &&
-            "border border-[#d4cfc8]/50 bg-[#e8e4df]/50 max-w-[80%] rounded-xl px-4 py-3 text-left",
+            "border border-[#d4cfc8]/50 bg-[#e8e4df]/50 max-w-[80%] rounded-xl px-4 py-3 text-left shadow-elegant hover:shadow-elegant-lg",
           !isUser && "w-full max-w-full"
         )}
       >

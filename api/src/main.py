@@ -24,7 +24,7 @@ exa = Exa(api_key=EXA_API_KEY)
 client = Cerebras(api_key=CEREBRAS_API_KEY)
 
 app = FastAPI(
-    title="Mathematiks Research API",
+    title="Mathmatika Research API",
     description="AI-powered research API with multi-agent capabilities and Manim visualization",
     version="1.0.0",
     openapi_tags=[

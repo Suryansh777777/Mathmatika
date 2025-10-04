@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/icon";
 import { useLocalStorage } from "usehooks-ts";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -87,8 +87,10 @@ export default function ChatPrompt({ input, setInput, append }: ChatPromptProps)
     <PromptWrapper>
       <form
         ref={formRef}
-        className="relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-[#d4cfc8]/70 bg-[#fdfcfb] px-3 pt-3 text-secondary-foreground outline-8 outline-[#e8e4df]/50 pb-3 max-sm:pb-6 sm:max-w-3xl"
-        style={{ boxShadow: "rgba(55, 50, 47, 0.1) 0px 80px 50px 0px, rgba(55, 50, 47, 0.07) 0px 50px 30px 0px, rgba(55, 50, 47, 0.06) 0px 30px 15px 0px, rgba(55, 50, 47, 0.04) 0px 15px 8px, rgba(55, 50, 47, 0.04) 0px 6px 4px, rgba(55, 50, 47, 0.02) 0px 2px 2px" }}
+        className="relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-[#d4cfc8]/70 glass-dark px-3 pt-3 text-secondary-foreground outline-8 outline-[#e8e4df]/50 pb-3 max-sm:pb-6 sm:max-w-3xl shadow-elegant-lg transition-shadow duration-200"
+        style={{
+          boxShadow: "rgba(55, 50, 47, 0.1) 0px 80px 50px 0px, rgba(55, 50, 47, 0.07) 0px 50px 30px 0px, rgba(55, 50, 47, 0.06) 0px 30px 15px 0px, rgba(55, 50, 47, 0.04) 0px 15px 8px, rgba(55, 50, 47, 0.04) 0px 6px 4px, rgba(55, 50, 47, 0.02) 0px 2px 2px"
+        }}
         onSubmit={submitHandler}
       >
         <div className="flex flex-grow flex-col">
@@ -124,15 +126,22 @@ export default function ChatPrompt({ input, setInput, append }: ChatPromptProps)
 
 const SendButton = () => {
   const [draft] = useLocalStorage<string>(DRAFT_KEY, "");
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div className="-mr-0.5 -mt-0.5 flex items-center justify-center gap-2" aria-label="Message actions">
       <Button
         variant="ghost"
         size="icon"
-        className="border-reflect button-reflect bg-[#37322f] font-semibold shadow hover:bg-[#4a443f] active:bg-[#37322f] disabled:hover:bg-[#37322f] disabled:active:bg-[#37322f] h-9 w-9 relative rounded-lg p-2 text-white hover:text-white disabled:hover:text-white"
+        className="border-reflect button-reflect bg-[#37322f] font-semibold shadow-sm hover:shadow-md hover:bg-[#4a443f] active:bg-[#37322f] active:scale-95 disabled:hover:bg-[#37322f] disabled:active:bg-[#37322f] h-9 w-9 relative rounded-lg p-2 text-white hover:text-white disabled:hover:text-white transition-all duration-150"
         disabled={draft.trim().length === 0}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        <Icon name="send" className="!size-5" />
+        <Icon
+          name="send"
+          className={`!size-5 transition-transform duration-150 ${isHovered ? 'translate-x-0.5 -translate-y-0.5' : ''}`}
+        />
       </Button>
     </div>
   );
@@ -175,7 +184,7 @@ const PromptActions = ({ model, setModel }: { model: string; setModel: (model: s
         <Button
           type="button"
           variant="outline"
-          className="text-xs -mb-1.5 h-auto gap-2 rounded-full border border-solid border-[#8b7d70]/10 py-1.5 pl-2 pr-2.5 text-[#5a5550] max-sm:p-2"
+          className="text-xs -mb-1.5 h-auto gap-2 rounded-full border border-solid border-[#8b7d70]/10 py-1.5 pl-2 pr-2.5 text-[#5a5550] max-sm:p-2 hover:border-[#8b7d70]/30 hover:shadow-sm transition-all duration-200"
         >
           <Icon name="web" />
           Search
@@ -183,7 +192,7 @@ const PromptActions = ({ model, setModel }: { model: string; setModel: (model: s
         <Button
           variant="outline"
           type="button"
-          className="text-xs -mb-1.5 h-auto gap-2 rounded-full border border-solid border-[#8b7d70]/10 py-1.5 pl-2 pr-2.5 text-[#5a5550] max-sm:p-2"
+          className="text-xs -mb-1.5 h-auto gap-2 rounded-full border border-solid border-[#8b7d70]/10 py-1.5 pl-2 pr-2.5 text-[#5a5550] max-sm:p-2 hover:border-[#8b7d70]/30 hover:shadow-sm transition-all duration-200"
         >
           <Icon name="media" />
         </Button>

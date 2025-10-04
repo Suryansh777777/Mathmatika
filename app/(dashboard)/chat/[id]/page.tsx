@@ -2,6 +2,7 @@
 
 import ChatPrompt from "@/components/chat/chat-prompt";
 import { Message } from "@/components/chat/message";
+import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
@@ -20,6 +21,7 @@ export default function ChatConversation() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isThinking, setIsThinking] = useState(false);
 
   // TODO: Replace with actual data fetching from your backend
   useEffect(() => {
@@ -40,7 +42,7 @@ export default function ChatConversation() {
     setMessages(mockMessages);
   }, [id]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive or thinking state changes
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
@@ -48,7 +50,7 @@ export default function ChatConversation() {
         behavior: "smooth",
       });
     }
-  }, [messages]);
+  }, [messages, isThinking]);
 
   const handleAppend = async (message: string) => {
     if (!id) {
@@ -63,6 +65,9 @@ export default function ChatConversation() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
+    // Show thinking indicator
+    setIsThinking(true);
+
     // TODO: Integrate with your backend API to get AI response
     // For now, add a mock response
     setTimeout(() => {
@@ -73,6 +78,7 @@ export default function ChatConversation() {
         model: "gpt-4o",
       };
       setMessages((prev) => [...prev, aiMessage]);
+      setIsThinking(false);
     }, 1000);
   };
 
@@ -85,7 +91,7 @@ export default function ChatConversation() {
       />
       <div
         ref={chatContainerRef}
-        className="absolute inset-0 overflow-y-scroll sm:pt-3.5 pb-[144px]"
+        className="absolute inset-0 overflow-y-scroll sm:pt-3.5 pb-[144px] smooth-scroll"
         style={{ scrollbarGutter: "stable both-edges" }}
       >
         <div
@@ -103,6 +109,7 @@ export default function ChatConversation() {
               model={message.model}
             />
           ))}
+          {isThinking && <TypingIndicator />}
         </div>
       </div>
     </>
