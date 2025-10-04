@@ -63,9 +63,10 @@ export default function ChatHome() {
   };
 
   const handleAppend = async (message: string) => {
-    // TODO: Integrate with your backend API
-    // For now, just create a new thread and navigate
-    const threadId = Date.now().toString(); // Replace with actual thread creation
+    // Create a new thread ID and navigate with the message
+    const threadId = Date.now().toString();
+    // Store the message in localStorage so the chat page can pick it up
+    sessionStorage.setItem(`chat-initial-${threadId}`, message);
     router.push(`/chat/${threadId}`);
   };
 

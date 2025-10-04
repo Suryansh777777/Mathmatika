@@ -1,7 +1,10 @@
 import os
+import json
+from typing import AsyncGenerator
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from exa_py import Exa
@@ -28,6 +31,10 @@ app = FastAPI(
     description="AI-powered research API with multi-agent capabilities and Manim visualization",
     version="1.0.0",
     openapi_tags=[
+        {
+            "name": "chat",
+            "description": "Streaming chat endpoints for conversational AI"
+        },
         {
             "name": "research",
             "description": "Research endpoints with varying depth and strategies"
@@ -83,6 +90,18 @@ class MultiAgentResearchResponse(BaseModel):
     subagents: int
     total_sources: int
     synthesis: str
+
+# Chat Models
+class ChatMessage(BaseModel):
+    role: str = Field(..., description="Message role: 'user', 'assistant', or 'system'")
+    content: str = Field(..., description="Message content")
+
+class ChatRequest(BaseModel):
+    message: str = Field(..., description="User message", min_length=1)
+    conversation_history: list[ChatMessage] = Field(
+        default_factory=list,
+        description="Previous conversation messages for context"
+    )
 
 # Web Search Function
 def search_web(query: str, num_results: int = 5):
@@ -352,6 +371,74 @@ RESEARCH QUALITY:
         "total_sources": total_sources,
         "synthesis": final_synthesis
     }
+
+# Streaming Chat Function
+async def stream_chat(request: ChatRequest) -> AsyncGenerator[str, None]:
+    """Stream chat responses from Cerebras"""
+    try:
+        # Build messages array with conversation history
+        messages = []
+
+        # Add system message
+        messages.append({
+            "role": "system",
+            "content": "You are a helpful mathematics tutor and research assistant. Provide clear, accurate explanations and help students understand mathematical concepts."
+        })
+
+        # Add conversation history
+        for msg in request.conversation_history:
+            messages.append({
+                "role": msg.role,
+                "content": msg.content
+            })
+
+        # Add current user message
+        messages.append({
+            "role": "user",
+            "content": request.message
+        })
+
+        # Create streaming completion
+        stream = client.chat.completions.create(
+            messages=messages,
+            model="llama-4-scout-17b-16e-instruct",
+            stream=True,
+            max_tokens=1500,
+            temperature=0.7
+        )
+
+        # Stream the response chunks
+        for chunk in stream:
+            if chunk.choices[0].delta.content:
+                content = chunk.choices[0].delta.content
+                # Format as SSE (Server-Sent Events)
+                yield f"data: {json.dumps({'content': content})}\n\n"
+
+        # Send done signal
+        yield f"data: {json.dumps({'done': True})}\n\n"
+
+    except Exception as e:
+        error_msg = f"Streaming error: {str(e)}"
+        yield f"data: {json.dumps({'error': error_msg})}\n\n"
+
+@app.post("/chat/stream", tags=["chat"])
+async def chat_stream(request: ChatRequest):
+    """
+    Streaming chat endpoint with conversation history
+
+    - Accepts user message and conversation history
+    - Streams AI responses in real-time using SSE
+    - Maintains context across conversation turns
+    - Uses Cerebras LLM for fast inference
+    """
+    return StreamingResponse(
+        stream_chat(request),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        }
+    )
 
 if __name__ == "__main__":
     import uvicorn

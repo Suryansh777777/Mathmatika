@@ -5,6 +5,7 @@ import { Message } from "@/components/chat/message";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useChatStream } from "@/lib/api/hooks";
 
 type Role = "user" | "assistant";
 
@@ -21,28 +22,22 @@ export default function ChatConversation() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isThinking, setIsThinking] = useState(false);
+  const [streamingContent, setStreamingContent] = useState("");
+  const chat = useChatStream();
 
-  // TODO: Replace with actual data fetching from your backend
+  // Check for initial message from chat home page
   useEffect(() => {
-    // Mock messages - replace with API call
-    const mockMessages: ChatMessage[] = [
-      {
-        id: "1",
-        role: "user",
-        content: "Explain the derivative of x^2",
-      },
-      {
-        id: "2",
-        role: "assistant",
-        content: "The derivative of x² is 2x. Here's why:\n\nUsing the power rule: d/dx(x^n) = nx^(n-1)\n\nFor x²:\n- n = 2\n- So the derivative = 2x^(2-1) = 2x^1 = 2x\n\nThis means the rate of change of x² at any point x is 2x.",
-        model: "gpt-4o",
-      },
-    ];
-    setMessages(mockMessages);
+    if (id) {
+      const initialMessage = sessionStorage.getItem(`chat-initial-${id}`);
+      if (initialMessage) {
+        sessionStorage.removeItem(`chat-initial-${id}`);
+        handleAppend(initialMessage);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Auto-scroll to bottom when new messages arrive or thinking state changes
+  // Auto-scroll to bottom when new messages arrive or streaming content changes
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
@@ -50,7 +45,7 @@ export default function ChatConversation() {
         behavior: "smooth",
       });
     }
-  }, [messages, isThinking]);
+  }, [messages, streamingContent, chat.isStreaming]);
 
   const handleAppend = async (message: string) => {
     if (!id) {
@@ -65,21 +60,36 @@ export default function ChatConversation() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    // Show thinking indicator
-    setIsThinking(true);
+    // Reset streaming content
+    setStreamingContent("");
 
-    // TODO: Integrate with your backend API to get AI response
-    // For now, add a mock response
-    setTimeout(() => {
-      const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "This is a mock response. Integrate with your backend API to get real AI responses.",
-        model: "gpt-4o",
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-      setIsThinking(false);
-    }, 1000);
+    // Stream AI response
+    await chat.sendMessage(message, {
+      onChunk: (content) => {
+        setStreamingContent((prev) => prev + content);
+      },
+      onComplete: (fullResponse) => {
+        const aiMessage: ChatMessage = {
+          id: Date.now().toString(),
+          role: "assistant",
+          content: fullResponse,
+          model: "llama-4-scout-17b",
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+        setStreamingContent("");
+      },
+      onError: (error) => {
+        console.error("Chat error:", error);
+        const errorMessage: ChatMessage = {
+          id: Date.now().toString(),
+          role: "assistant",
+          content: `Error: ${error.message}`,
+          model: "error",
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+        setStreamingContent("");
+      },
+    });
   };
 
   return (
@@ -109,7 +119,16 @@ export default function ChatConversation() {
               model={message.model}
             />
           ))}
-          {isThinking && <TypingIndicator />}
+          {chat.isStreaming && streamingContent && (
+            <Message
+              key="streaming"
+              message={streamingContent}
+              messageId="streaming"
+              role="assistant"
+              model="llama-4-scout-17b"
+            />
+          )}
+          {chat.isStreaming && !streamingContent && <TypingIndicator />}
         </div>
       </div>
     </>
