@@ -24,7 +24,7 @@ if not OPENROUTER_API_KEY:
     logger.warning("OPENROUTER_API_KEY not found in environment variables")
 
 
-def extract_code_from_response(text: str) -> str:
+async def extract_code_from_response(text: str) -> str:
     """Extract Python code from AI response."""
     if not text:
         return ""
@@ -35,7 +35,7 @@ def extract_code_from_response(text: str) -> str:
     return text.strip()
 
 
-def generate_manim_prompt(concept: str) -> str:
+async def generate_manim_prompt(concept: str) -> str:
     """Generate a detailed prompt for GPT to create Manim code."""
     return f"""Create a detailed Manim animation to demonstrate and explain: {concept}
 
@@ -109,7 +109,7 @@ class MainScene(Scene):  # or ThreeDScene for 3D
 Only output valid Manim Python code without any additional text or markdown."""
 
 
-def generate_ai_manim_code(concept: str) -> Optional[str]:
+async def generate_ai_manim_code(concept: str) -> Optional[str]:
     """Generate Manim code using OpenRouter Llama models."""
     if not OPENROUTER_API_KEY:
         logger.error("OpenRouter API key not available")
@@ -121,7 +121,7 @@ def generate_ai_manim_code(concept: str) -> Optional[str]:
             "Create a scene class named MainScene (or ThreeDScene when appropriate). "
             "Use MathTex for any mathematical expressions. Do not include markdown."
         )
-        user_prompt = generate_manim_prompt(concept)
+        user_prompt = await generate_manim_prompt(concept)
         
         headers = {
             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -150,7 +150,7 @@ def generate_ai_manim_code(concept: str) -> Optional[str]:
         if response.status_code == 200:
             result = response.json()
             content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-            code = extract_code_from_response(content)
+            code = await extract_code_from_response(content)
             return code if code else None
         else:
             logger.error(f"OpenRouter API error: {response.status_code} - {response.text}")

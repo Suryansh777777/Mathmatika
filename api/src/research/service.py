@@ -1,0 +1,278 @@
+"""
+Core Research service for handling research tasks.
+"""
+
+import logging
+import os
+from fastapi import HTTPException
+from exa_py import Exa
+from cerebras.cloud.sdk import Cerebras
+from dotenv import load_dotenv
+
+from .models import ResearchRequest
+
+logger = logging.getLogger(__name__)
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get API keys from environment variables
+EXA_API_KEY = os.getenv("EXA_API_KEY")
+CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
+
+# Check if API keys are set
+if not EXA_API_KEY or not CEREBRAS_API_KEY:
+    raise RuntimeError("API keys for Exa and Cerebras must be set in a .env file.")
+
+# Initialize clients
+exa = Exa(api_key=EXA_API_KEY)
+client = Cerebras(api_key=CEREBRAS_API_KEY)
+
+class ResearchService:
+    """Service for handling research tasks."""
+
+    def search_web(self, query: str, num_results: int = 5):
+        """Search the web using Exa's auto search"""
+        try:
+            result = exa.search_and_contents(
+                query,
+                type="auto",
+                num_results=num_results,
+                text={"max_characters": 1000}
+            )
+            return result.results
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Exa API error: {e}")
+
+    def ask_ai(self, prompt: str):
+        """Get AI response from Cerebras"""
+        try:
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
+                model="llama-4-scout-17b-16e-instruct",
+                max_tokens=600,
+                temperature=0.2
+            )
+            return chat_completion.choices[0].message.content
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Cerebras API error: {e}")
+
+    def research_topic(self, request: ResearchRequest):
+        """
+        Basic research with AI synthesis
+        """
+        query = request.query
+        logger.info(f"🔍 Researching: {query}")
+
+        # Search for sources
+        results = self.search_web(query, 5)
+        logger.info(f"📊 Found {len(results)} sources")
+
+        # Get content from sources
+        sources = []
+        for result in results:
+            content = result.text
+            title = result.title
+            if content and len(content) > 200:
+                sources.append({
+                    "title": title,
+                    "content": content
+                })
+
+        logger.info(f"📄 Scraped {len(sources)} sources")
+
+        if not sources:
+            return {"summary": "No sources found", "insights": []}
+
+        # Create context for AI analysis
+        context = f"Research query: {query}\n\nSources:\n"
+        for i, source in enumerate(sources[:4], 1):
+            context += f"{i}. {source['title']}: {source['content'][:400]}...\n\n"
+            
+
+        # Ask AI to analyze and synthesize
+        prompt = f"""{context}
+
+Based on these sources, provide:
+1. A comprehensive summary (2-3 sentences)
+2. Three key insights as bullet points
+
+Format your response exactly like this:
+SUMMARY: [your summary here]
+
+INSIGHTS:
+- [insight 1]
+- [insight 2]
+- [insight 3]"""
+
+        response = self.ask_ai(prompt)
+        logger.info("🧠 Analysis complete")
+
+        return {"query": query, "sources": len(sources), "response": response}
+
+    def deeper_research_topic(self, request: ResearchRequest):
+        """
+        Two-layer research for better depth
+        """
+        query = request.query
+        logger.info(f"🔍 Researching: {query}")
+
+        # Layer 1: Initial search
+        results = self.search_web(query, 6)
+        sources = []
+        for result in results:
+            if result.text and len(result.text) > 200:
+                sources.append({"title": result.title, "content": result.text})
+
+        logger.info(f"Layer 1: Found {len(sources)} sources")
+
+        if not sources:
+            return {"summary": "No sources found", "insights": []}
+
+        # Get initial analysis and identify follow-up topic
+        context1 = f"Research query: {query}\n\nSources:\n"
+        for i, source in enumerate(sources[:4], 1):
+            context1 += f"{i}. {source['title']}: {source['content'][:300]}...\n\n"
+
+        follow_up_prompt = f"""{context1}
+
+Based on these sources, what's the most important follow-up question that would deepen our understanding of \"{query}\"?
+
+Respond with just a specific search query (no explanation):"""
+
+        follow_up_query = self.ask_ai(follow_up_prompt).strip().strip('"')
+
+        # Layer 2: Follow-up search
+        logger.info(f"Layer 2: Investigating '{follow_up_query}'")
+        follow_results = self.search_web(follow_up_query, 4)
+
+        for result in follow_results:
+            if result.text and len(result.text) > 200:
+                sources.append({"title": f"[Follow-up] {result.title}", "content": result.text})
+
+        logger.info(f"Total sources: {len(sources)}")
+
+        # Final synthesis
+        all_context = f"Research query: {query}\nFollow-up: {follow_up_query}\n\nAll Sources:\n"
+        for i, source in enumerate(sources[:7], 1):
+            all_context += f"{i}. {source['title']}: {source['content'][:300]}...\n\n"
+
+        final_prompt = f"""{all_context}
+
+Provide a comprehensive analysis:
+
+SUMMARY: [3-4 sentences covering key findings from both research layers]
+
+INSIGHTS:
+- [insight 1]
+- [insight 2]
+- [insight 3]
+- [insight 4]
+
+DEPTH GAINED: [1 sentence on how the follow-up search enhanced understanding]"""
+
+        response = self.ask_ai(final_prompt)
+        return {"query": query, "sources": len(sources), "response": response}
+
+    def multi_agent_research(self, request: ResearchRequest):
+        """
+        Multi-agent research with parallel execution
+        """
+        query = request.query
+        logger.info(f"🤖 Anthropic Multi-Agent Research: {query}")
+        logger.info("-" * 50)
+
+        # Step 1: Lead Agent - Task Decomposition & Delegation
+        logger.info("👨‍💼 LEAD AGENT: Planning and delegating...")
+
+        delegation_prompt = f"""You are a Lead Research Agent. Break down this complex query into 3 specialized subtasks for parallel execution: \"{query}\"\n
+For each subtask, provide:
+- Clear objective
+- Specific search focus
+- Expected output
+
+SUBTASK 1: [Core/foundational aspects]
+SUBTASK 2: [Recent developments/trends]
+SUBTASK 3: [Applications/implications]\n
+Make each subtask distinct to avoid overlap."""
+
+        plan = self.ask_ai(delegation_prompt)
+        logger.info("  ✓ Subtasks defined and delegated")
+
+        # Step 2: Simulate Parallel Subagents (simplified for demo)
+        logger.info("\n🔍 SUBAGENTS: Working in parallel...")
+
+        # Extract subtasks and create targeted searches
+        subtask_searches = [
+            f"{query} fundamentals principles",  # Core aspects
+            f"{query} latest developments",  # Recent trends
+            f"{query} applications real world"    # Implementation
+        ]
+
+        subagent_results = []
+        for i, search_term in enumerate(subtask_searches, 1):
+            logger.info(f"  🤖 Subagent {i}: Researching {search_term}")
+            results = self.search_web(search_term, 2)
+
+            sources = []
+            for result in results:
+                if result.text and len(result.text) > 200:
+                    sources.append({
+                        "title": result.title,
+                        "content": result.text[:300]
+                    })
+
+            subagent_results.append({
+                "subtask": i,
+                "search_focus": search_term,
+                "sources": sources
+            })
+
+        total_sources = sum(len(r["sources"]) for r in subagent_results)
+        logger.info(f"  📊 Combined: {total_sources} sources from {len(subagent_results)} agents")
+
+        # Step 3: Lead Agent - Synthesis
+        logger.info("\n👨‍💼 LEAD AGENT: Synthesizing parallel findings...")
+
+        # Combine all subagent findings
+        synthesis_context = f"ORIGINAL QUERY: {query}\n\nSUBAGENT FINDINGS:\n"
+        for result in subagent_results:
+            synthesis_context += f"\nSubagent {result['subtask']} ({result['search_focus']}):\n"
+            for source in result['sources'][:2]:  # Limit for brevity
+                synthesis_context += f"- {source['title']}: {source['content']}...\n"
+
+        synthesis_prompt = f"""{synthesis_context}
+
+As the Lead Agent, synthesize these parallel findings into a comprehensive report:
+
+EXECUTIVE SUMMARY:
+[2-3 sentences covering the most important insights across all subagents]
+
+INTEGRATED FINDINGS:
+• [Key finding from foundational research]
+• [Key finding from recent developments]
+• [Key finding from applications research]
+• [Cross-cutting insight that emerged]
+
+RESEARCH QUALITY:
+- Sources analyzed: {total_sources} across {len(subagent_results)} specialized agents
+- Coverage: [How well the subtasks covered the topic]"""
+
+        final_synthesis = self.ask_ai(synthesis_prompt)
+
+        logger.info("\n" + "=" * 50)
+        logger.info("🎯 MULTI-AGENT RESEARCH COMPLETE")
+        logger.info("=" * 50)
+        logger.info(final_synthesis)
+
+        return {
+            "query": query,
+            "subagents": len(subagent_results),
+            "total_sources": total_sources,
+            "synthesis": final_synthesis
+        }

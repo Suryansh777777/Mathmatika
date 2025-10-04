@@ -5,7 +5,6 @@ FastAPI router for Manim animation generation endpoints.
 import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
-from pathlib import Path
 
 from .models import (
     ManimGenerateRequest,
@@ -43,7 +42,7 @@ async def generate_animation(request: ManimGenerateRequest):
     """
     try:
         # Generate the animation
-        result = manim_service.render_animation(
+        result = await manim_service.render_animation(
             concept=request.concept,
             quality=request.quality,
             use_ai=request.use_ai

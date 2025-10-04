@@ -13,7 +13,7 @@ LATEX_COMMAND_HINTS = [
 ]
 
 
-def is_likely_latex(text: str) -> bool:
+async def is_likely_latex(text: str) -> bool:
     """Check if text is likely a LaTeX expression."""
     t = text.strip()
     if not t:
@@ -27,7 +27,7 @@ def is_likely_latex(text: str) -> bool:
     return False
 
 
-def clean_latex(text: str) -> str:
+async def clean_latex(text: str) -> str:
     """Clean LaTeX expression by removing common delimiters."""
     t = text.strip()
     # remove common delimiters
@@ -37,13 +37,13 @@ def clean_latex(text: str) -> str:
     return t.strip()
 
 
-def generate_latex_scene_code(expr: str) -> str:
+async def generate_latex_scene_code(expr: str) -> str:
     """Generate Manim code for LaTeX expression."""
-    expr = clean_latex(expr)
+    expr = await clean_latex(expr)
     return f"""from manim import *
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         title = Title('LaTeX Expression')
         eq = MathTex(r"{expr}").scale(1.2)
         self.play(Write(title))
@@ -56,7 +56,7 @@ class MainScene(Scene):
 TEMPLATE_MAPPINGS = {
     'pythagorean': {
         'keywords': ['pythagoras', 'pythagorean', 'right triangle', 'hypotenuse'],
-        'generator': 'generate_pythagorean_code'
+        'generator': 'await generate_pythagorean_code'
     },
     'quadratic': {
         'keywords': ['quadratic', 'parabola', 'x squared', 'x^2'],
@@ -105,7 +105,7 @@ TEMPLATE_MAPPINGS = {
 }
 
 
-def select_template(concept: str) -> Optional[str]:
+async def select_template(concept: str) -> Optional[str]:
     """Select appropriate template based on the concept."""
     concept = concept.lower().strip()
     
@@ -129,11 +129,11 @@ def select_template(concept: str) -> Optional[str]:
     return None
 
 
-def generate_pythagorean_code():
+async def generate_pythagorean_code():
     return '''from manim import *
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         # Create triangle
         triangle = Polygon(
             ORIGIN, RIGHT*3, UP*4,
@@ -158,11 +158,11 @@ class MainScene(Scene):
         self.wait()'''
 
 
-def generate_derivative_code():
+async def generate_derivative_code():
     return '''from manim import *
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         # Create coordinate system
         axes = Axes(
             x_range=[-2, 2],
@@ -175,13 +175,13 @@ class MainScene(Scene):
         y_label = MathTex("y").next_to(axes.y_axis.get_end(), UP)
         
         # Create function
-        def func(x):
+        async def func(x):
             return x**2
             
         graph = axes.plot(func, color=BLUE)
         
         # Create derivative function
-        def deriv(x):
+        async def deriv(x):
             return 2*x
             
         derivative = axes.plot(deriv, color=RED)
@@ -198,11 +198,11 @@ class MainScene(Scene):
         self.wait()'''
 
 
-def generate_integral_code():
+async def generate_integral_code():
     return '''from manim import *
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         # Create coordinate system
         axes = Axes(
             x_range=[-2, 2],
@@ -215,7 +215,7 @@ class MainScene(Scene):
         y_label = MathTex("y").next_to(axes.y_axis.get_end(), UP)
         
         # Create function
-        def func(x):
+        async def func(x):
             return x**2
             
         graph = axes.plot(func, color=BLUE)
@@ -240,12 +240,12 @@ class MainScene(Scene):
         self.wait()'''
 
 
-def generate_3d_surface_code():
+async def generate_3d_surface_code():
     return '''from manim import *
 import numpy as np
 
 class MainScene(ThreeDScene):
-    def construct(self):
+    async def construct(self):
         # Set up the axes
         axes = ThreeDAxes(
             x_range=[-3, 3, 1],
@@ -258,7 +258,7 @@ class MainScene(ThreeDScene):
         )
         
         # Create surface function
-        def param_surface(u, v):
+        async def param_surface(u, v):
             x = u
             y = v
             z = np.sin(np.sqrt(x**2 + y**2))
@@ -303,12 +303,12 @@ class MainScene(ThreeDScene):
 '''
 
 
-def generate_sphere_code():
+async def generate_sphere_code():
     return '''from manim import *
 import numpy as np
 
 class MainScene(ThreeDScene):
-    def construct(self):
+    async def construct(self):
         # Set up the scene
         self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
         axes = ThreeDAxes(
@@ -360,11 +360,11 @@ class MainScene(ThreeDScene):
         self.stop_ambient_camera_rotation()'''
 
 
-def generate_cube_code():
+async def generate_cube_code():
     return '''from manim import *
 
 class MainScene(ThreeDScene):
-    def construct(self):
+    async def construct(self):
         # Set up the scene
         self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
         axes = ThreeDAxes(
@@ -398,11 +398,11 @@ class MainScene(ThreeDScene):
         self.stop_ambient_camera_rotation()'''
 
 
-def generate_matrix_code():
+async def generate_matrix_code():
     return '''from manim import *
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         # Create matrices
         matrix_a = Matrix([
             [2, 1],
@@ -446,11 +446,11 @@ class MainScene(Scene):
         self.wait()'''
 
 
-def generate_eigenvalue_code():
+async def generate_eigenvalue_code():
     return '''from manim import *
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         # Create matrix and vector
         matrix = Matrix([
             [2, 1],
@@ -491,11 +491,11 @@ class MainScene(Scene):
         self.wait()'''
 
 
-def generate_complex_code():
+async def generate_complex_code():
     return '''from manim import *
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         # Set up plane
         plane = ComplexPlane()
         self.play(Create(plane))
@@ -530,12 +530,12 @@ class MainScene(Scene):
         self.wait()'''
 
 
-def generate_diff_eq_code():
+async def generate_diff_eq_code():
     return '''from manim import *
 import numpy as np
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         # Create differential equation
         eq = MathTex(r"\\frac{dy}{dx} + 2y = e^x")
         
@@ -579,11 +579,11 @@ class MainScene(Scene):
         self.wait()'''
 
 
-def generate_trig_code():
+async def generate_trig_code():
     return '''from manim import *
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         # Create coordinate plane
         plane = NumberPlane(
             x_range=[-4, 4],
@@ -646,11 +646,11 @@ class MainScene(Scene):
         self.wait()'''
 
 
-def generate_quadratic_code():
+async def generate_quadratic_code():
     return '''from manim import *
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         # Create coordinate system
         axes = Axes(
             x_range=[-4, 4],
@@ -663,7 +663,7 @@ class MainScene(Scene):
         y_label = MathTex("y").next_to(axes.y_axis.get_end(), UP)
         
         # Create quadratic function
-        def func(x):
+        async def func(x):
             return x**2
             
         graph = axes.plot(
@@ -722,13 +722,13 @@ class MainScene(Scene):
         self.wait()'''
 
 
-def generate_basic_visualization_code():
+async def generate_basic_visualization_code():
     """Generate code for basic visualization."""
     return '''from manim import *
 import numpy as np
 
 class MainScene(Scene):
-    def construct(self):
+    async def construct(self):
         # Create title
         title = Text("Mathematical Visualization", font_size=36).to_edge(UP)
         
@@ -783,7 +783,7 @@ class MainScene(Scene):
 '''
 
 
-def get_available_templates():
+async def get_available_templates():
     """Get information about available templates."""
     templates = []
     for name, info in TEMPLATE_MAPPINGS.items():

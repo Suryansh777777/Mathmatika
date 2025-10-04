@@ -3,14 +3,12 @@ Core Manim service for animation generation.
 """
 
 import os
-import tempfile
 import subprocess
 import logging
-import uuid
 import shutil
 from datetime import datetime
 import random
-from typing import Optional, Tuple
+from typing import Tuple
 from pathlib import Path
 
 from .templates import (
@@ -61,39 +59,39 @@ class ManimService:
             directory.mkdir(parents=True, exist_ok=True)
             logger.info(f'Created/verified directory: {directory}')
     
-    def sanitize_input(self, text: str) -> str:
+    async def sanitize_input(self, text: str) -> str:
         """Sanitize input text by removing extra whitespace and newlines."""
         return ' '.join(text.strip().split())
-    
-    def generate_manim_code(self, concept: str, use_ai: bool = True) -> Tuple[str, bool]:
+
+    async def generate_manim_code(self, concept: str, use_ai: bool = True) -> Tuple[str, bool]:
         """
         Generate Manim code for the given concept.
         
         Returns:
             Tuple of (code, used_ai)
         """
-        concept = self.sanitize_input(concept)
+        concept = await self.sanitize_input(concept)
         used_ai = False
         
         # Check if this is a LaTeX expression
-        if is_likely_latex(concept):
-            return generate_latex_scene_code(concept), False
+        if await is_likely_latex(concept):
+            return await generate_latex_scene_code(concept), False
         
         # Try to match with a template first
-        template_code = select_template(concept.lower())
+        template_code = await select_template(concept.lower())
         if template_code:
             return template_code, False
         
         # Try AI generation if enabled and templates fail
         if use_ai:
-            ai_code = generate_ai_manim_code(concept)
+            ai_code = await generate_ai_manim_code(concept)
             if ai_code:
                 return ai_code, True
         
         # Fallback to basic visualization
-        return generate_basic_visualization_code(), False
-    
-    def render_animation(
+        return await generate_basic_visualization_code(), False
+
+    async def render_animation(
         self,
         concept: str,
         quality: str = None,
@@ -128,7 +126,7 @@ class ManimService:
             
             try:
                 # Generate Manim code
-                manim_code, used_ai = self.generate_manim_code(concept, use_ai)
+                manim_code, used_ai = await self.generate_manim_code(concept, use_ai)
                 
                 if not manim_code:
                     return {
@@ -210,7 +208,7 @@ class ManimService:
                                 continue
                 
                 if not video_found:
-                    logger.error(f'Video not found in any expected locations')
+                    logger.error('Video not found in any expected locations')
                     return {
                         'success': False,
                         'error': 'Generated video file not found',
