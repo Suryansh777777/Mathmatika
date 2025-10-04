@@ -126,3 +126,127 @@
 .backdrop-blur-custom {
   backdrop-filter: blur(8.25px);
 }
+
+/* Chat-specific variables */
+:root {
+  --heading: hsl(25, 20%, 25%);
+  --chat-border: hsl(30, 12%, 85%);
+  --chat-background: hsl(30, 20%, 97%);
+  --chat-accent: #f5f3f1;
+  --chat-input-gradient: hsl(30, 25%, 90%);
+  --chat-input-background: hsla(30, 20%, 98%, var(--blur-fallback, 0.1));
+  --chat-input-outline: hsl(30, 25%, 90%);
+  --chat-overlay: hsla(30, 15%, 92%, var(--blur-fallback, 0.72));
+  --wordmark-color: #37322f;
+}
+
+/* Chat scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/40;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+  -webkit-background-clip: content-box;
+}
+
+/* Chat component styles */
+@layer components {
+  .button-reflect {
+    --min: #37322f40 !important;
+    --max: #8b7d70b0 !important;
+    --start: #000000d9 !important;
+  }
+
+  [data-state="inactive"].border-reflect:before {
+    content: none;
+  }
+
+  :focus-visible {
+    outline-color: var(--ring);
+    outline-style: solid;
+    outline-width: 1px;
+  }
+
+  .border-reflect:before {
+    content: "";
+    pointer-events: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: var(--gradientBorder-size, 1px);
+    background: var(--gradientBorder-gradient);
+    -webkit-mask: linear-gradient(var(--start), #000) content-box, linear-gradient(var(--start), #000);
+    mask: linear-gradient(var(--start), #000) content-box, linear-gradient(var(--start), #000);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: var(--opacity, 1);
+  }
+
+  .border-reflect {
+    --c: 30 15% 60%;
+    --min: hsl(var(--c) / 0.2);
+    --max: hsl(var(--c) / 1);
+    --gradientBorder-gradient: linear-gradient(180deg, var(--min), var(--max), var(--min)), linear-gradient(15deg, var(--min) 50%, var(--max));
+    --opacity: 1;
+    --start: rgba(0, 0, 0, .85);
+    position: relative;
+  }
+
+  .small-scrollbar::-webkit-scrollbar {
+    width: 4px !important;
+    height: 4px !important
+  }
+
+  .small-scrollbar[data-scrolling=true]::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground)/.4)
+  }
+
+  .small-scrollbar::-webkit-scrollbar-thumb {
+    transition: background .2s ease-in-out;
+    background: transparent;
+    border-radius: 4px;
+    border: 1.5px solid transparent;
+    background-clip: content-box;
+    -webkit-background-clip: content-box
+  }
+
+  .small-scrollbar::-webkit-scrollbar-thumb:hover {
+    border: 1px solid transparent;
+    background: hsl(var(--muted-foreground)/.5)
+  }
+
+  .scroll-shadow:not([data-shadow=false]) {
+    --shadow-height: 20px;
+    --scrollbar-width: 8px;
+    mask-image: linear-gradient(to bottom, transparent, #000 var(--shadow-height), #000 calc(100% - var(--shadow-height)), transparent 100%), linear-gradient(to left, #fff var(--scrollbar-width), transparent var(--scrollbar-width));
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--shadow-height), #000 calc(100% - var(--shadow-height)), transparent 100%), linear-gradient(to left, #fff var(--scrollbar-width), transparent var(--scrollbar-width));
+  }
+}
+
+/* Chat animations */
+@theme {
+  --ease-snappy: cubic-bezier(.2, .4, .1, .95);
+  --animate-bounce-dots: bounce 1s infinite;
+
+  @keyframes bounce {
+    0%,
+    to {
+      transform: translateY(-25%);
+      animation-timing-function: cubic-bezier(.8, 0, 1, 1)
+    }
+
+    50% {
+      transform: none;
+      animation-timing-function: cubic-bezier(0, 0, .2, 1)
+    }
+  }
+}
