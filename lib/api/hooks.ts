@@ -223,7 +223,6 @@ export function useChatStream() {
 
               if (data.content) {
                 fullResponse += data.content;
-                console.log("📦 Chunk received:", data.content);
                 options?.onChunk?.(data.content);
               }
 

@@ -80,24 +80,31 @@ interface ThreadListProps {
 export default function ThreadList({ searchQuery = "" }: ThreadListProps) {
   const [threads, setThreads] = useState<Thread[]>([]);
 
-  // TODO: Replace with actual data fetching from your backend
+  // Load threads from localStorage
   useEffect(() => {
-    // Mock data - replace with your API call
-    const mockThreads: Thread[] = [
-      {
-        id: "1",
-        title: "Understanding calculus derivatives",
-        timestamp: Date.now(),
-        pinned: false,
-      },
-      {
-        id: "2",
-        title: "Linear algebra basics",
-        timestamp: Date.now() - 86400000,
-        pinned: true,
-      },
-    ];
-    setThreads(mockThreads);
+    const loadThreads = () => {
+      if (typeof window === "undefined") return;
+
+      try {
+        const stored = localStorage.getItem("mathematika_chat_threads");
+        if (stored) {
+          const allThreads = JSON.parse(stored);
+          setThreads(allThreads);
+        }
+      } catch (error) {
+        console.error("Failed to load threads:", error);
+      }
+    };
+
+    loadThreads();
+
+    // Listen for thread updates
+    const handleThreadsUpdate = () => loadThreads();
+    window.addEventListener("threads-updated", handleThreadsUpdate);
+
+    return () => {
+      window.removeEventListener("threads-updated", handleThreadsUpdate);
+    };
   }, []);
 
   // Filter threads based on search query
@@ -109,6 +116,13 @@ export default function ThreadList({ searchQuery = "" }: ThreadListProps) {
 
   return (
     <div className="relative flex-1">
+      {threads.length === 0 && !searchQuery && (
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center animate-slide-up">
+          <Icon name="newThread" className="size-12 text-[#8b7d70]/30 mb-3" />
+          <p className="text-sm text-[#8b7d70]">No conversations yet</p>
+          <p className="text-xs text-[#8b7d70]/60 mt-1">Start a new chat to begin</p>
+        </div>
+      )}
       {groupedThreads.length === 0 && searchQuery && (
         <div className="flex flex-col items-center justify-center py-8 px-4 text-center animate-slide-up">
           <p className="text-sm text-[#8b7d70]">No threads found</p>

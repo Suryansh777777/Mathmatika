@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import { useChatStream } from "@/lib/api/hooks";
+import { getThread, addMessageToThread } from "@/lib/chat-storage";
 
 type Role = "user" | "assistant";
 
@@ -26,13 +27,27 @@ export default function ChatConversation() {
   const [streamingContent, setStreamingContent] = useState("");
   const chat = useChatStream();
 
-  // Check for initial message from chat home page
+  // Load thread messages on mount
   useEffect(() => {
     if (id) {
-      const initialMessage = sessionStorage.getItem(`chat-initial-${id}`);
-      if (initialMessage) {
-        sessionStorage.removeItem(`chat-initial-${id}`);
-        handleAppend(initialMessage);
+      const thread = getThread(id as string);
+      if (thread && thread.messages.length > 0) {
+        // Load existing messages
+        setMessages(
+          thread.messages.map((msg) => ({
+            id: msg.id,
+            role: msg.role as Role,
+            content: msg.content,
+            model: msg.model,
+          }))
+        );
+      } else {
+        // Check for initial message from chat home page
+        const initialMessage = sessionStorage.getItem(`chat-initial-${id}`);
+        if (initialMessage) {
+          sessionStorage.removeItem(`chat-initial-${id}`);
+          handleAppend(initialMessage);
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -61,6 +76,13 @@ export default function ChatConversation() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
+    // Save user message to storage
+    addMessageToThread(id as string, {
+      id: userMessage.id,
+      role: userMessage.role,
+      content: userMessage.content,
+    });
+
     // Reset streaming content
     setStreamingContent("");
 
@@ -80,6 +102,14 @@ export default function ChatConversation() {
         };
         setMessages((prev) => [...prev, aiMessage]);
         setStreamingContent("");
+
+        // Save AI response to storage
+        addMessageToThread(id as string, {
+          id: aiMessage.id,
+          role: aiMessage.role,
+          content: aiMessage.content,
+          model: aiMessage.model,
+        });
       },
       onError: (error) => {
         console.error("Chat error:", error);
