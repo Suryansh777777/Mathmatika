@@ -86,7 +86,7 @@ export default function ChatPrompt({ input, setInput, append, videoEnabled = fal
   };
 
   return (
-    <PromptWrapper>
+    <PromptWrapper videoEnabled={videoEnabled}>
       <form
         ref={formRef}
         className="relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-[#d4cfc8]/70 glass-dark px-3 pt-3 text-secondary-foreground outline-8 outline-[#e8e4df]/50 pb-3 max-sm:pb-6 sm:max-w-3xl shadow-elegant-lg transition-shadow duration-200"
@@ -238,9 +238,11 @@ const PromptActions = ({
   );
 };
 
-const PromptWrapper = ({ children }: { children: React.ReactNode }) => {
+const PromptWrapper = ({ children, videoEnabled = false }: { children: React.ReactNode; videoEnabled?: boolean }) => {
   return (
-    <div className="pointer-events-none absolute bottom-0 z-10 w-full px-2">
+    <div className={`pointer-events-none absolute bottom-0 z-10 px-2 transition-all duration-300 ${
+      videoEnabled ? "w-[60%]" : "w-full"
+    }`}>
       <div className="relative mx-auto flex w-full max-w-3xl flex-col text-center">
         <div className="pointer-events-none">
           <div className="pointer-events-auto">
