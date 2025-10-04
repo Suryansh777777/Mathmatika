@@ -237,3 +237,221 @@ export function useManimGeneration() {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }
+
+/**
+ * Hook for RAG PDF upload
+ */
+export function useRAGUpload() {
+  return useMutation({
+    mutationFn: async (data: { file: File; indexName?: string }) => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+      const formData = new FormData();
+      formData.append("file", data.file);
+      if (data.indexName) {
+        formData.append("index_name", data.indexName);
+      }
+
+      const response = await fetch(`${apiUrl}/rag/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.detail || `HTTP ${response.status}: Failed to upload PDF`
+        );
+      }
+
+      return response.json();
+    },
+  });
+}
+
+/**
+ * Hook for RAG query streaming
+ */
+export function useRAGQuery() {
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const query = useCallback(
+    async (
+      question: string,
+      options?: {
+        indexName?: string;
+        onChunk?: (content: string) => void;
+        onComplete?: (fullResponse: string, sources: any[]) => void;
+        onError?: (error: Error) => void;
+      }
+    ) => {
+      setIsStreaming(true);
+      setError(null);
+
+      let fullResponse = "";
+      let sources: any[] = [];
+      abortControllerRef.current = new AbortController();
+
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const response = await fetch(`${apiUrl}/rag/query/stream`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: question,
+            index_name: options?.indexName || "pdf-index",
+          }),
+          signal: abortControllerRef.current.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (!reader) {
+          throw new Error("No reader available");
+        }
+
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (!line.trim() || !line.startsWith("data: ")) continue;
+
+            try {
+              const data = JSON.parse(line.slice(6));
+
+              if (data.error) {
+                throw new Error(data.error);
+              }
+
+              if (data.content) {
+                fullResponse += data.content;
+                options?.onChunk?.(data.content);
+              }
+
+              if (data.sources) {
+                sources = data.sources;
+              }
+
+              if (data.done === true) {
+                options?.onComplete?.(fullResponse, sources);
+              }
+            } catch (e) {
+              console.error("Failed to parse SSE:", line, e);
+            }
+          }
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          console.log("Stream cancelled");
+          return;
+        }
+        const error =
+          err instanceof Error ? err : new Error("Streaming failed");
+        setError(error);
+        options?.onError?.(error);
+      } finally {
+        setIsStreaming(false);
+        abortControllerRef.current = null;
+      }
+    },
+    []
+  );
+
+  const cancelStream = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
+
+  return {
+    query,
+    cancelStream,
+    isStreaming,
+    error,
+  };
+}
+
+/**
+ * Hook for text-to-speech
+ */
+export function useTextToSpeech() {
+  return useMutation({
+    mutationFn: async (data: {
+      text: string;
+      voice?: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
+      model?: "tts-1" | "tts-1-hd";
+      speed?: number;
+    }) => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+      const response = await fetch(`${apiUrl}/voice/text-to-speech`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: data.text,
+          voice: data.voice || "alloy",
+          model: data.model || "tts-1",
+          speed: data.speed || 1.0,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.detail || `HTTP ${response.status}: Failed to generate speech`
+        );
+      }
+
+      // Return audio blob
+      const audioBlob = await response.blob();
+      return URL.createObjectURL(audioBlob);
+    },
+  });
+}
+
+/**
+ * Hook for speech-to-text
+ */
+export function useSpeechToText() {
+  return useMutation({
+    mutationFn: async (audioFile: File) => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+      const formData = new FormData();
+      formData.append("audio", audioFile);
+
+      const response = await fetch(`${apiUrl}/voice/speech-to-text`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.detail || `HTTP ${response.status}: Failed to transcribe audio`
+        );
+      }
+
+      return response.json();
+    },
+  });
+}

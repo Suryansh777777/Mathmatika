@@ -56,3 +56,6 @@ api/venv
 
 # Manim videos
 *.mp4
+
+.gemini
+.claude
