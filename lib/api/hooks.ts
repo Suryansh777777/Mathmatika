@@ -1,132 +1,6 @@
-import { useMutation, type UseMutationOptions, useQuery } from "@tanstack/react-query";
-import { apiClient } from "./client";
-import type { operations } from "./schema";
+import { useMutation } from "@tanstack/react-query";
+
 import { useState, useCallback, useRef } from "react";
-
-/**
- * Type definitions for API requests and responses (strictly from OpenAPI schema)
- */
-type ResearchRequest =
-  operations["research_topic_research_post"]["requestBody"]["content"]["application/json"];
-type ResearchResponse =
-  operations["research_topic_research_post"]["responses"][200]["content"]["application/json"];
-type DeepResearchResponse =
-  operations["deeper_research_topic_deep_research_post"]["responses"][200]["content"]["application/json"];
-type MultiAgentResearchResponse =
-  operations["anthropic_multiagent_research_multi_agent_research_post"]["responses"][200]["content"]["application/json"];
-
-/**
- * Hook for basic research endpoint
- *
- * @example
- * ```tsx
- * const research = useResearch();
- *
- * research.mutate({ query: "What is quantum computing?" }, {
- *   onSuccess: (data) => console.log(data),
- *   onError: (error) => console.error(error)
- * });
- * ```
- */
-export function useResearch(
-  options?: UseMutationOptions<ResearchResponse, Error, ResearchRequest>
-) {
-  return useMutation({
-    mutationFn: async (request: ResearchRequest) => {
-      const { data, error } = await apiClient.POST("/research", {
-        body: request,
-      });
-
-      if (error) {
-        const message =
-          (error as { detail?: string }).detail ||
-          (error as { message?: string }).message ||
-          "Research failed";
-        throw new Error(message);
-      }
-
-      return data;
-    },
-    ...options,
-  });
-}
-
-/**
- * Hook for deep research endpoint (two-layer research)
- *
- * @example
- * ```tsx
- * const deepResearch = useDeepResearch();
- *
- * deepResearch.mutate({ query: "Climate change solutions" }, {
- *   onSuccess: (data) => console.log(data),
- * });
- * ```
- */
-export function useDeepResearch(
-  options?: UseMutationOptions<DeepResearchResponse, Error, ResearchRequest>
-) {
-  return useMutation({
-    mutationFn: async (request: ResearchRequest) => {
-      const { data, error } = await apiClient.POST("/deep-research", {
-        body: request,
-      });
-
-      if (error) {
-        const message =
-          (error as { detail?: string }).detail ||
-          (error as { message?: string }).message ||
-          "Deep research failed";
-        throw new Error(message);
-      }
-
-      return data;
-    },
-    ...options,
-  });
-}
-
-/**
- * Hook for multi-agent research endpoint
- *
- * @example
- * ```tsx
- * const multiAgentResearch = useMultiAgentResearch();
- *
- * multiAgentResearch.mutate({ query: "AI safety research" }, {
- *   onSuccess: (data) => {
- *     console.log(`Analyzed by ${data.subagents} agents`);
- *     console.log(`Total sources: ${data.total_sources}`);
- *   },
- * });
- * ```
- */
-export function useMultiAgentResearch(
-  options?: UseMutationOptions<
-    MultiAgentResearchResponse,
-    Error,
-    ResearchRequest
-  >
-) {
-  return useMutation({
-    mutationFn: async (request: ResearchRequest) => {
-      const { data, error } = await apiClient.POST("/multi-agent-research", {
-        body: request,
-      });
-
-      if (error) {
-        const message =
-          (error as { detail?: string }).detail ||
-          (error as { message?: string }).message ||
-          "Multi-agent research failed";
-        throw new Error(message);
-      }
-
-      return data;
-    },
-    ...options,
-  });
-}
 
 /**
  * Chat message type
@@ -154,13 +28,13 @@ export interface ChatMessage {
 export function useChatStream() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [conversationHistory, setConversationHistory] = useState<ChatMessage[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const sendMessage = useCallback(
     async (
       message: string,
       options?: {
+        conversationHistory?: ChatMessage[];
         onChunk?: (content: string) => void;
         onComplete?: (fullResponse: string) => void;
         onError?: (error: Error) => void;
@@ -173,7 +47,8 @@ export function useChatStream() {
       abortControllerRef.current = new AbortController();
 
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
         const response = await fetch(`${apiUrl}/chat/stream`, {
           method: "POST",
           headers: {
@@ -181,7 +56,7 @@ export function useChatStream() {
           },
           body: JSON.stringify({
             message,
-            conversation_history: conversationHistory,
+            conversation_history: options?.conversationHistory || [],
           }),
           signal: abortControllerRef.current.signal,
         });
@@ -227,11 +102,6 @@ export function useChatStream() {
               }
 
               if (data.done === true) {
-                setConversationHistory((prev) => [
-                  ...prev,
-                  { role: "user", content: message },
-                  { role: "assistant", content: fullResponse },
-                ]);
                 options?.onComplete?.(fullResponse);
               }
             } catch (e) {
@@ -240,11 +110,12 @@ export function useChatStream() {
           }
         }
       } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          console.log('Stream cancelled');
+        if (err instanceof Error && err.name === "AbortError") {
+          console.log("Stream cancelled");
           return;
         }
-        const error = err instanceof Error ? err : new Error("Streaming failed");
+        const error =
+          err instanceof Error ? err : new Error("Streaming failed");
         setError(error);
         options?.onError?.(error);
       } finally {
@@ -252,16 +123,11 @@ export function useChatStream() {
         abortControllerRef.current = null;
       }
     },
-    [conversationHistory]
+    []
   );
 
   const cancelStream = useCallback(() => {
     abortControllerRef.current?.abort();
-  }, []);
-
-  const resetConversation = useCallback(() => {
-    setConversationHistory([]);
-    setError(null);
   }, []);
 
   return {
@@ -269,8 +135,6 @@ export function useChatStream() {
     cancelStream,
     isStreaming,
     error,
-    conversationHistory,
-    resetConversation,
   };
 }
 
@@ -298,24 +162,78 @@ export function useManimGeneration() {
       use_ai?: boolean;
     }) => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/manim/generate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          concept: request.concept,
-          quality: request.quality || "medium",
-          use_ai: request.use_ai !== false,
-        }),
+
+      console.log("🎬 Manim Generation Request:", {
+        apiUrl,
+        concept: request.concept,
+        quality: request.quality,
+        use_ai: request.use_ai,
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || "Failed to generate animation");
-      }
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
 
-      return await response.json();
+      try {
+        const response = await fetch(`${apiUrl}/manim/generate`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            concept: request.concept,
+            quality: request.quality || "medium",
+            use_ai: request.use_ai !== false,
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        console.log("🎬 Response status:", response.status);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error("🎬 Error response:", errorData);
+          throw new Error(
+            errorData.detail ||
+              `HTTP ${response.status}: Failed to generate animation`
+          );
+        }
+
+        const data = await response.json();
+        console.log("🎬 Success response:", data);
+
+        // Validate response
+        if (!data.success) {
+          console.error("🎬 Generation failed:", data.error, data.details);
+          throw new Error(
+            data.error || data.details || "Animation generation failed"
+          );
+        }
+
+        return data;
+      } catch (err) {
+        clearTimeout(timeoutId);
+
+        if (err instanceof Error && err.name === "AbortError") {
+          throw new Error(
+            "Animation generation timed out. Try with lower quality or simpler concept."
+          );
+        }
+
+        console.error("🎬 Manim generation error:", err);
+        throw err;
+      }
     },
+    retry: (failureCount, error) => {
+      console.log("🎬 Retry attempt:", failureCount, error.message);
+      // Retry up to 2 times, but not for timeout errors
+      if (error.message.includes("timed out")) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }

@@ -20,6 +20,7 @@ interface ChatPromptProps {
   append: (message: string) => Promise<void>;
   videoEnabled?: boolean;
   onVideoToggle?: (enabled: boolean) => void;
+  enableVideoLayout?: boolean;
 }
 
 const modelRegistry = {
@@ -29,7 +30,7 @@ const modelRegistry = {
   "gemini-2.0": { provider: "google", modelId: "gemini-2.0-flash" },
 };
 
-export default function ChatPrompt({ input, setInput, append, videoEnabled = false, onVideoToggle }: ChatPromptProps) {
+export default function ChatPrompt({ input, setInput, append, videoEnabled = false, onVideoToggle, enableVideoLayout = false }: ChatPromptProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [draft, setDraft, removeDraft] = useLocalStorage<string>(DRAFT_KEY, "");
@@ -86,7 +87,7 @@ export default function ChatPrompt({ input, setInput, append, videoEnabled = fal
   };
 
   return (
-    <PromptWrapper videoEnabled={videoEnabled}>
+    <PromptWrapper videoEnabled={enableVideoLayout && videoEnabled}>
       <form
         ref={formRef}
         className="relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-[#d4cfc8]/70 glass-dark px-3 pt-3 text-secondary-foreground outline-8 outline-[#e8e4df]/50 pb-3 max-sm:pb-6 sm:max-w-3xl shadow-elegant-lg transition-shadow duration-200"

@@ -3,7 +3,11 @@
 import ChatPrompt from "@/components/chat/chat-prompt";
 import { Message } from "@/components/chat/message";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
-import { VideoPanel, type VideoState, type VideoQuality } from "@/components/chat/video-panel";
+import {
+  VideoPanel,
+  type VideoState,
+  type VideoQuality,
+} from "@/components/chat/video-panel";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
@@ -30,6 +34,8 @@ export default function ChatConversation() {
   const [videoQuality, setVideoQuality] = useState<VideoQuality>("medium");
   const [videoState, setVideoState] = useState<VideoState>({ status: "idle" });
   const [lastUserMessage, setLastUserMessage] = useState("");
+
+  // Hooks
   const chat = useChatStream();
   const manimGeneration = useManimGeneration();
 
@@ -50,6 +56,15 @@ export default function ChatConversation() {
       } else {
         // Check for initial message from chat home page
         const initialMessage = sessionStorage.getItem(`chat-initial-${id}`);
+        const videoEnabledState = sessionStorage.getItem(
+          `chat-video-enabled-${id}`
+        );
+
+        if (videoEnabledState) {
+          setVideoEnabled(videoEnabledState === "true");
+          sessionStorage.removeItem(`chat-video-enabled-${id}`);
+        }
+
         if (initialMessage) {
           sessionStorage.removeItem(`chat-initial-${id}`);
           handleAppend(initialMessage);
@@ -68,6 +83,40 @@ export default function ChatConversation() {
       });
     }
   }, [messages, streamingContent, chat.isStreaming]);
+
+  // Generate video when toggling on (if there's a last message)
+  useEffect(() => {
+    if (videoEnabled && lastUserMessage && videoState.status === "idle") {
+      setVideoState({ status: "generating", progress: 0 });
+
+      manimGeneration.mutate(
+        {
+          concept: lastUserMessage,
+          quality: videoQuality,
+          use_ai: true,
+        },
+        {
+          onSuccess: (data) => {
+            const apiUrl =
+              process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            setVideoState({
+              status: "ready",
+              videoUrl: `${apiUrl}${data.video_url}`,
+            });
+          },
+          onError: (error: Error) => {
+            setVideoState({
+              status: "error",
+              error: error.message,
+            });
+          },
+        }
+      );
+    } else if (!videoEnabled) {
+      // Reset video state when toggling off
+      setVideoState({ status: "idle" });
+    }
+  }, [videoEnabled]);
 
   const handleAppend = async (message: string) => {
     if (!id) {
@@ -106,8 +155,9 @@ export default function ChatConversation() {
           use_ai: true,
         },
         {
-          onSuccess: (data: any) => {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          onSuccess: (data) => {
+            const apiUrl =
+              process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
             setVideoState({
               status: "ready",
               videoUrl: `${apiUrl}${data.video_url}`,
@@ -125,6 +175,10 @@ export default function ChatConversation() {
 
     // Stream AI response
     await chat.sendMessage(message, {
+      conversationHistory: messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
       onChunk: (content) => {
         flushSync(() => {
           setStreamingContent((prev) => prev + content);
@@ -174,8 +228,9 @@ export default function ChatConversation() {
         use_ai: true,
       },
       {
-        onSuccess: (data: any) => {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        onSuccess: (data) => {
+          const apiUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
           setVideoState({
             status: "ready",
             videoUrl: `${apiUrl}${data.video_url}`,
@@ -199,6 +254,7 @@ export default function ChatConversation() {
         append={handleAppend}
         videoEnabled={videoEnabled}
         onVideoToggle={setVideoEnabled}
+        enableVideoLayout={true}
       />
       <div className="absolute inset-0 flex">
         {/* Chat Area */}

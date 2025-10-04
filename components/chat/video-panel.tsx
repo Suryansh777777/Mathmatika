@@ -64,7 +64,9 @@ export function VideoPanel({
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#d4cfc8]/30 bg-[#fdfcfb]/80 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <span className="text-lg">🎬</span>
-          <h3 className="text-sm font-semibold text-[#37322f]">Video Generation</h3>
+          <h3 className="text-sm font-semibold text-[#37322f]">
+            Video Generation
+          </h3>
         </div>
         <Button
           variant="ghost"
@@ -91,12 +93,19 @@ export function VideoPanel({
               Ready to visualize!
             </h4>
             <p className="text-sm text-[#8b7d70] max-w-xs mb-6">
-              Send a message to generate an animated video explanation using Manim
+              Send a message to generate an animated video explanation using
+              Manim
             </p>
             <div className="flex flex-wrap gap-2 justify-center text-xs text-[#8b7d70]/70">
-              <span className="px-3 py-1 rounded-full bg-[#e8e4df]/50">LaTeX support</span>
-              <span className="px-3 py-1 rounded-full bg-[#e8e4df]/50">HD Quality</span>
-              <span className="px-3 py-1 rounded-full bg-[#e8e4df]/50">Instant download</span>
+              <span className="px-3 py-1 rounded-full bg-[#e8e4df]/50">
+                LaTeX support
+              </span>
+              <span className="px-3 py-1 rounded-full bg-[#e8e4df]/50">
+                HD Quality
+              </span>
+              <span className="px-3 py-1 rounded-full bg-[#e8e4df]/50">
+                Instant download
+              </span>
             </div>
           </div>
         )}
@@ -139,7 +148,9 @@ export function VideoPanel({
                     style={{ width: `${videoState.progress}%` }}
                   />
                 </div>
-                <p className="text-xs text-[#8b7d70] mt-2">{videoState.progress}%</p>
+                <p className="text-xs text-[#8b7d70] mt-2">
+                  {videoState.progress}%
+                </p>
               </div>
             )}
           </div>
@@ -166,7 +177,11 @@ export function VideoPanel({
                   className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <div className="bg-white/90 rounded-full p-4 shadow-xl">
-                    <svg className="w-8 h-8 text-[#37322f]" fill="currentColor" viewBox="0 0 20 20">
+                    <svg
+                      className="w-8 h-8 text-[#37322f]"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                     </svg>
                   </div>
@@ -198,7 +213,7 @@ export function VideoPanel({
               </div>
 
               {/* Quality Selector */}
-              <div className="flex flex-col gap-2">
+              {/* <div className="flex flex-col gap-2">
                 <label className="text-xs font-medium text-[#5a5550]">Quality</label>
                 <div className="flex gap-2">
                   {(["low", "medium", "high"] as VideoQuality[]).map((q) => (
@@ -216,7 +231,7 @@ export function VideoPanel({
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
@@ -233,7 +248,8 @@ export function VideoPanel({
               Generation failed
             </h4>
             <p className="text-sm text-[#8b7d70] max-w-xs mb-6">
-              {videoState.error || "Something went wrong while generating the video"}
+              {videoState.error ||
+                "Something went wrong while generating the video"}
             </p>
             <Button
               onClick={onRegenerate}

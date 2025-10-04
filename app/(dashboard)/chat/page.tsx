@@ -56,6 +56,7 @@ export default function ChatHome() {
   const router = useRouter();
   const [_, setDraft] = useLocalStorage<string>(DRAFT_KEY, "");
   const [input, setInput] = useState("");
+  const [videoEnabled, setVideoEnabled] = useState(false);
 
   const handlePromptClick = (prompt: string) => {
     setInput(prompt);
@@ -65,8 +66,9 @@ export default function ChatHome() {
   const handleAppend = async (message: string) => {
     // Create a new thread ID and navigate with the message
     const threadId = Date.now().toString();
-    // Store the message in localStorage so the chat page can pick it up
+    // Store the message and video state so the chat page can pick it up
     sessionStorage.setItem(`chat-initial-${threadId}`, message);
+    sessionStorage.setItem(`chat-video-enabled-${threadId}`, videoEnabled.toString());
     router.push(`/chat/${threadId}`);
   };
 
@@ -76,6 +78,8 @@ export default function ChatHome() {
         input={input}
         setInput={setInput}
         append={handleAppend}
+        videoEnabled={videoEnabled}
+        onVideoToggle={setVideoEnabled}
       />
       <div className="absolute inset-0 overflow-y-scroll sm:pt-3.5 pb-[144px] smooth-scroll" style={{ scrollbarGutter: "stable both-edges" }}>
         <div role="log" aria-label="Chat messages" aria-live="polite" className="mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 py-10">
