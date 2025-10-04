@@ -3,10 +3,11 @@
 import ChatPrompt from "@/components/chat/chat-prompt";
 import { Message } from "@/components/chat/message";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
+import { VideoPanel, type VideoState, type VideoQuality } from "@/components/chat/video-panel";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
-import { useChatStream } from "@/lib/api/hooks";
+import { useChatStream, useManimGeneration } from "@/lib/api/hooks";
 import { getThread, addMessageToThread } from "@/lib/chat-storage";
 
 type Role = "user" | "assistant";
@@ -25,7 +26,12 @@ export default function ChatConversation() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [streamingContent, setStreamingContent] = useState("");
+  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [videoQuality, setVideoQuality] = useState<VideoQuality>("medium");
+  const [videoState, setVideoState] = useState<VideoState>({ status: "idle" });
+  const [lastUserMessage, setLastUserMessage] = useState("");
   const chat = useChatStream();
+  const manimGeneration = useManimGeneration();
 
   // Load thread messages on mount
   useEffect(() => {
@@ -83,8 +89,39 @@ export default function ChatConversation() {
       content: userMessage.content,
     });
 
+    // Store message for video generation
+    setLastUserMessage(message);
+
     // Reset streaming content
     setStreamingContent("");
+
+    // Start video generation if enabled
+    if (videoEnabled) {
+      setVideoState({ status: "generating", progress: 0 });
+
+      manimGeneration.mutate(
+        {
+          concept: message,
+          quality: videoQuality,
+          use_ai: true,
+        },
+        {
+          onSuccess: (data: any) => {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            setVideoState({
+              status: "ready",
+              videoUrl: `${apiUrl}${data.video_url}`,
+            });
+          },
+          onError: (error: Error) => {
+            setVideoState({
+              status: "error",
+              error: error.message,
+            });
+          },
+        }
+      );
+    }
 
     // Stream AI response
     await chat.sendMessage(message, {
@@ -125,44 +162,93 @@ export default function ChatConversation() {
     });
   };
 
+  const handleVideoRegenerate = () => {
+    if (!lastUserMessage) return;
+
+    setVideoState({ status: "generating", progress: 0 });
+
+    manimGeneration.mutate(
+      {
+        concept: lastUserMessage,
+        quality: videoQuality,
+        use_ai: true,
+      },
+      {
+        onSuccess: (data: any) => {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          setVideoState({
+            status: "ready",
+            videoUrl: `${apiUrl}${data.video_url}`,
+          });
+        },
+        onError: (error: Error) => {
+          setVideoState({
+            status: "error",
+            error: error.message,
+          });
+        },
+      }
+    );
+  };
+
   return (
     <>
       <ChatPrompt
         input={input}
         setInput={setInput}
         append={handleAppend}
+        videoEnabled={videoEnabled}
+        onVideoToggle={setVideoEnabled}
       />
-      <div
-        ref={chatContainerRef}
-        className="absolute inset-0 overflow-y-scroll sm:pt-3.5 pb-[144px] smooth-scroll"
-        style={{ scrollbarGutter: "stable both-edges" }}
-      >
+      <div className="absolute inset-0 flex">
+        {/* Chat Area */}
         <div
-          role="log"
-          aria-label="Chat messages"
-          aria-live="polite"
-          className="mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 py-10"
+          ref={chatContainerRef}
+          className={`overflow-y-scroll sm:pt-3.5 pb-[144px] smooth-scroll transition-all duration-300 ${
+            videoEnabled ? "w-[60%]" : "w-full"
+          }`}
+          style={{ scrollbarGutter: "stable both-edges" }}
         >
-          {messages.map((message) => (
-            <Message
-              key={message.id}
-              message={message.content}
-              messageId={message.id}
-              role={message.role}
-              model={message.model}
-            />
-          ))}
-          {chat.isStreaming && streamingContent && (
-            <Message
-              key="streaming"
-              message={streamingContent}
-              messageId="streaming"
-              role="assistant"
-              model="llama-4-scout-17b"
-            />
-          )}
-          {chat.isStreaming && !streamingContent && <TypingIndicator />}
+          <div
+            role="log"
+            aria-label="Chat messages"
+            aria-live="polite"
+            className="mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 py-10"
+          >
+            {messages.map((message) => (
+              <Message
+                key={message.id}
+                message={message.content}
+                messageId={message.id}
+                role={message.role}
+                model={message.model}
+              />
+            ))}
+            {chat.isStreaming && streamingContent && (
+              <Message
+                key="streaming"
+                message={streamingContent}
+                messageId="streaming"
+                role="assistant"
+                model="llama-4-scout-17b"
+              />
+            )}
+            {chat.isStreaming && !streamingContent && <TypingIndicator />}
+          </div>
         </div>
+
+        {/* Video Panel */}
+        {videoEnabled && (
+          <div className="w-[40%] h-full animate-slide-in-right">
+            <VideoPanel
+              videoState={videoState}
+              quality={videoQuality}
+              onQualityChange={setVideoQuality}
+              onRegenerate={handleVideoRegenerate}
+              onClose={() => setVideoEnabled(false)}
+            />
+          </div>
+        )}
       </div>
     </>
   );

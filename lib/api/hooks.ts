@@ -1,4 +1,4 @@
-import { useMutation, type UseMutationOptions } from "@tanstack/react-query";
+import { useMutation, type UseMutationOptions, useQuery } from "@tanstack/react-query";
 import { apiClient } from "./client";
 import type { operations } from "./schema";
 import { useState, useCallback, useRef } from "react";
@@ -272,4 +272,50 @@ export function useChatStream() {
     conversationHistory,
     resetConversation,
   };
+}
+
+/**
+ * Hook for generating Manim animations
+ *
+ * @example
+ * ```tsx
+ * const manim = useManimGeneration();
+ *
+ * manim.mutate({
+ *   concept: "derivative of x^2",
+ *   quality: "medium",
+ *   use_ai: true
+ * }, {
+ *   onSuccess: (data) => console.log(data.video_url),
+ * });
+ * ```
+ */
+export function useManimGeneration() {
+  return useMutation({
+    mutationFn: async (request: {
+      concept: string;
+      quality?: "low" | "medium" | "high";
+      use_ai?: boolean;
+    }) => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/manim/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          concept: request.concept,
+          quality: request.quality || "medium",
+          use_ai: request.use_ai !== false,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || "Failed to generate animation");
+      }
+
+      return await response.json();
+    },
+  });
 }

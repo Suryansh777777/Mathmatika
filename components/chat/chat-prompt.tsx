@@ -18,6 +18,8 @@ interface ChatPromptProps {
   input: string;
   setInput: (input: string) => void;
   append: (message: string) => Promise<void>;
+  videoEnabled?: boolean;
+  onVideoToggle?: (enabled: boolean) => void;
 }
 
 const modelRegistry = {
@@ -27,7 +29,7 @@ const modelRegistry = {
   "gemini-2.0": { provider: "google", modelId: "gemini-2.0-flash" },
 };
 
-export default function ChatPrompt({ input, setInput, append }: ChatPromptProps) {
+export default function ChatPrompt({ input, setInput, append, videoEnabled = false, onVideoToggle }: ChatPromptProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [draft, setDraft, removeDraft] = useLocalStorage<string>(DRAFT_KEY, "");
@@ -116,7 +118,12 @@ export default function ChatPrompt({ input, setInput, append }: ChatPromptProps)
           </div>
           <div className="-mb-px mt-2 flex w-full flex-row-reverse justify-between">
             <SendButton />
-            <PromptActions model={model} setModel={setModel} />
+            <PromptActions
+              model={model}
+              setModel={setModel}
+              videoEnabled={videoEnabled}
+              onVideoToggle={onVideoToggle}
+            />
           </div>
         </div>
       </form>
@@ -147,7 +154,17 @@ const SendButton = () => {
   );
 };
 
-const PromptActions = ({ model, setModel }: { model: string; setModel: (model: string) => void }) => {
+const PromptActions = ({
+  model,
+  setModel,
+  videoEnabled,
+  onVideoToggle,
+}: {
+  model: string;
+  setModel: (model: string) => void;
+  videoEnabled?: boolean;
+  onVideoToggle?: (enabled: boolean) => void;
+}) => {
   const handleClick = (key: string) => {
     setModel(key);
   };
@@ -195,6 +212,26 @@ const PromptActions = ({ model, setModel }: { model: string; setModel: (model: s
           className="text-xs -mb-1.5 h-auto gap-2 rounded-full border border-solid border-[#8b7d70]/10 py-1.5 pl-2 pr-2.5 text-[#5a5550] max-sm:p-2 hover:border-[#8b7d70]/30 hover:shadow-sm transition-all duration-200"
         >
           <Icon name="media" />
+        </Button>
+        <Button
+          variant="outline"
+          type="button"
+          onClick={() => onVideoToggle?.(!videoEnabled)}
+          className={`text-xs -mb-1.5 h-auto gap-2 rounded-full border border-solid py-1.5 pl-2 pr-2.5 max-sm:p-2 transition-all duration-200 ${
+            videoEnabled
+              ? "bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/40 text-purple-700 shadow-md hover:shadow-lg"
+              : "border-[#8b7d70]/10 text-[#5a5550] hover:border-[#8b7d70]/30 hover:shadow-sm"
+          }`}
+          title={videoEnabled ? "Disable video generation" : "Enable video generation"}
+        >
+          <span className={videoEnabled ? "text-lg" : ""}>🎬</span>
+          <span className="max-sm:hidden">Video</span>
+          {videoEnabled && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+            </span>
+          )}
         </Button>
       </div>
     </div>
