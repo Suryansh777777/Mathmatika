@@ -11,12 +11,6 @@ import random
 from typing import Tuple
 from pathlib import Path
 
-from .templates import (
-    is_likely_latex,
-    generate_latex_scene_code,
-    select_template,
-    generate_basic_visualization_code
-)
 from .ai_generator import generate_ai_manim_code
 
 
@@ -63,7 +57,7 @@ class ManimService:
         """Sanitize input text by removing extra whitespace and newlines."""
         return ' '.join(text.strip().split())
 
-    async def generate_manim_code(self, concept: str, use_ai: bool = True) -> Tuple[str, bool]:
+    async def generate_manim_code(self, concept: str) -> Tuple[str, bool]:
         """
         Generate Manim code for the given concept.
         
@@ -71,31 +65,18 @@ class ManimService:
             Tuple of (code, used_ai)
         """
         concept = await self.sanitize_input(concept)
-        used_ai = False
         
-        # Check if this is a LaTeX expression
-        if await is_likely_latex(concept):
-            return await generate_latex_scene_code(concept), False
+        # Generate code using AI
+        ai_code = await generate_ai_manim_code(concept)
+        if ai_code:
+            return ai_code, True
         
-        # Try to match with a template first
-        template_code = await select_template(concept.lower())
-        if template_code:
-            return template_code, False
-        
-        # Try AI generation if enabled and templates fail
-        if use_ai:
-            ai_code = await generate_ai_manim_code(concept)
-            if ai_code:
-                return ai_code, True
-        
-        # Fallback to basic visualization
-        return await generate_basic_visualization_code(), False
+        return None, False
 
     async def render_animation(
         self,
         concept: str,
         quality: str = None,
-        use_ai: bool = True
     ) -> dict:
         """
         Generate and render a Manim animation.
@@ -103,7 +84,6 @@ class ManimService:
         Args:
             concept: Mathematical concept or LaTeX expression
             quality: Render quality (low, medium, high)
-            use_ai: Whether to use AI generation if no template matches
             
         Returns:
             Dictionary with success status, video URL, code, and other metadata
@@ -126,7 +106,7 @@ class ManimService:
             
             try:
                 # Generate Manim code
-                manim_code, used_ai = await self.generate_manim_code(concept, use_ai)
+                manim_code, used_ai = await self.generate_manim_code(concept)
                 
                 if not manim_code:
                     return {
