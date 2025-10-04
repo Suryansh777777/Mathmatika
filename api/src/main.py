@@ -382,7 +382,12 @@ async def stream_chat(request: ChatRequest) -> AsyncGenerator[str, None]:
         # Add system message
         messages.append({
             "role": "system",
-            "content": "You are a helpful mathematics tutor and research assistant. Provide clear, accurate explanations and help students understand mathematical concepts."
+            "content": """You are a helpful mathematics tutor and research assistant. Provide clear, accurate explanations and help students understand mathematical concepts.
+
+IMPORTANT: Always use LaTeX for mathematical expressions:
+- Inline math: $x^2 + 5x + 6$
+- Display math: $$\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$$
+- Use proper LaTeX syntax for all equations, formulas, and mathematical symbols."""
         })
 
         # Add conversation history

@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/icon";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import remarkGfm from "remark-gfm";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 interface MessageProps {
   message: string;
@@ -53,8 +58,13 @@ export function Message({ message, messageId, role, model }: MessageProps) {
         <span className="sr-only">
           {isUser ? "Your message: " : "Assistant Reply: "}
         </span>
-        <div className="prose prose-stone max-w-none prose-pre:m-0 prose-pre:bg-transparent prose-pre:p-0">
-          <p className="whitespace-pre-wrap text-[#37322f]">{message}</p>
+        <div className="prose prose-stone max-w-none prose-pre:m-0 prose-pre:bg-transparent prose-pre:p-0 prose-p:text-[#37322f] prose-p:my-0 space-y-1">
+          <ReactMarkdown
+            remarkPlugins={[remarkMath, remarkGfm]}
+            rehypePlugins={[rehypeKatex]}
+          >
+            {message}
+          </ReactMarkdown>
         </div>
         <div
           className={cn(

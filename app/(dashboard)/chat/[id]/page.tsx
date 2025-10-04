@@ -4,6 +4,7 @@ import ChatPrompt from "@/components/chat/chat-prompt";
 import { Message } from "@/components/chat/message";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import { useChatStream } from "@/lib/api/hooks";
 
@@ -66,7 +67,9 @@ export default function ChatConversation() {
     // Stream AI response
     await chat.sendMessage(message, {
       onChunk: (content) => {
-        setStreamingContent((prev) => prev + content);
+        flushSync(() => {
+          setStreamingContent((prev) => prev + content);
+        });
       },
       onComplete: (fullResponse) => {
         const aiMessage: ChatMessage = {

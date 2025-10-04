@@ -1,7 +1,7 @@
 import { useMutation, type UseMutationOptions } from "@tanstack/react-query";
 import { apiClient } from "./client";
 import type { operations } from "./schema";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 
 /**
  * Type definitions for API requests and responses (strictly from OpenAPI schema)
@@ -155,6 +155,7 @@ export function useChatStream() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [conversationHistory, setConversationHistory] = useState<ChatMessage[]>([]);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const sendMessage = useCallback(
     async (
@@ -169,6 +170,7 @@ export function useChatStream() {
       setError(null);
 
       let fullResponse = "";
+      abortControllerRef.current = new AbortController();
 
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -181,6 +183,7 @@ export function useChatStream() {
             message,
             conversation_history: conversationHistory,
           }),
+          signal: abortControllerRef.current.signal,
         });
 
         if (!response.ok) {
@@ -194,16 +197,24 @@ export function useChatStream() {
           throw new Error("No reader available");
         }
 
+        let buffer = "";
+
         while (true) {
           const { done, value } = await reader.read();
 
           if (done) break;
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
+          // Decode with stream flag for partial UTF-8 sequences
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+
+          // Keep last partial line in buffer
+          buffer = lines.pop() || "";
 
           for (const line of lines) {
-            if (line.startsWith("data: ")) {
+            if (!line.trim() || !line.startsWith("data: ")) continue;
+
+            try {
               const data = JSON.parse(line.slice(6));
 
               if (data.error) {
@@ -212,32 +223,42 @@ export function useChatStream() {
 
               if (data.content) {
                 fullResponse += data.content;
+                console.log("📦 Chunk received:", data.content);
                 options?.onChunk?.(data.content);
               }
 
-              if (data.done) {
-                // Update conversation history
+              if (data.done === true) {
                 setConversationHistory((prev) => [
                   ...prev,
                   { role: "user", content: message },
                   { role: "assistant", content: fullResponse },
                 ]);
-
                 options?.onComplete?.(fullResponse);
               }
+            } catch (e) {
+              console.error("Failed to parse SSE:", line, e);
             }
           }
         }
       } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          console.log('Stream cancelled');
+          return;
+        }
         const error = err instanceof Error ? err : new Error("Streaming failed");
         setError(error);
         options?.onError?.(error);
       } finally {
         setIsStreaming(false);
+        abortControllerRef.current = null;
       }
     },
     [conversationHistory]
   );
+
+  const cancelStream = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
 
   const resetConversation = useCallback(() => {
     setConversationHistory([]);
@@ -246,6 +267,7 @@ export function useChatStream() {
 
   return {
     sendMessage,
+    cancelStream,
     isStreaming,
     error,
     conversationHistory,
