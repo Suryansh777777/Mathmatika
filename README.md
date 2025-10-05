@@ -1,6 +1,6 @@
-# Mathematiks
+# Mathmatika
 
-> AI-Powered Mathematics Learning Platform with Research, RAG, Voice Mentorship, and Video Generation
+> AI-Powered Mathematics Learning Platform with Research, RAG, and Video Generation
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.4.4-black)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.1.0-blue)](https://react.dev/)
@@ -30,7 +30,7 @@
 
 ## Overview
 
-**Mathematiks** is a comprehensive mathematics learning platform that combines AI-powered research, document processing, interactive chat, voice mentorship, and video generation to transform how students learn mathematics. The platform enables users to upload materials, ask questions, and receive structured notes, educational videos, and interactive assessments—all powered by cutting-edge AI technology.
+**Mathmatika** is a comprehensive mathematics learning platform that combines AI-powered research, document processing, interactive chat, voice mentorship, and video generation to transform how students learn mathematics. The platform enables users to upload materials, ask questions, and receive structured notes, educational videos, and interactive assessments—all powered by cutting-edge AI technology.
 
 ### Vision
 
@@ -40,19 +40,6 @@ Enable students to learn mathematics more effectively by providing AI-powered co
 
 ## Features
 
-### 🔬 AI Research Modes
-
-- **Basic Research**: Quick web search + AI synthesis (5 sources, 2-3 sentence summary + 3 insights)
-- **Deep Research**: Two-layer research with follow-up queries (6 + 4 sources)
-- **Multi-Agent Research**: Anthropic-style parallel task decomposition and synthesis
-
-### 📚 RAG (Retrieval-Augmented Generation)
-
-- PDF document processing with PyMuPDF
-- Pinecone vector database integration
-- Semantic search with HuggingFace embeddings
-- Context-aware question answering
-
 ### 💬 Interactive Chat
 
 - Real-time conversational AI interface
@@ -60,12 +47,12 @@ Enable students to learn mathematics more effectively by providing AI-powered co
 - Markdown support with syntax highlighting
 - Streaming responses for better UX
 
-### 🎙️ Voice Mentor
+### 📚 RAG (Retrieval-Augmented Generation)
 
-- LiveKit-powered real-time voice interaction
-- Deepgram speech-to-text integration
-- OpenAI TTS for voice responses
-- Natural conversational flow with VAD (Voice Activity Detection)
+- PDF document processing with PyMuPDF
+- Pinecone vector database integration
+- Semantic search with HuggingFace embeddings
+- Context-aware question answering
 
 ### 🎬 Video Generation
 
@@ -86,29 +73,29 @@ Enable students to learn mathematics more effectively by providing AI-powered co
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Frontend (Next.js)                      │
-│  ┌────────────┬──────────────┬────────────┬──────────────┐ │
-│  │ Research   │ Chat UI      │ Voice UI   │ Video Player │ │
-│  │ Interface  │ (Markdown)   │ (LiveKit)  │ (Manim)      │ │
-│  └────────────┴──────────────┴────────────┴──────────────┘ │
-│                  TanStack Query + OpenAPI Client             │
+│                      Frontend (Next.js)                     │
+│        ┌────────────┬──────────────┬──────────────┐         │
+│        │ Research   │ Chat UI      │ Video Player │         │
+│        │ Interface  │ (Markdown)   │ (Manim)      │         │
+│        └────────────┴──────────────┴──────────────┘         │
+│                  TanStack Query + OpenAPI Client            │
 └───────────────────────────┬─────────────────────────────────┘
                             │ REST API
                             │
 ┌───────────────────────────▼─────────────────────────────────┐
-│                    Backend (FastAPI)                         │
-│  ┌──────────────┬──────────────┬──────────────┬──────────┐ │
-│  │ Research     │ RAG Engine   │ Voice Agent  │ Manim    │ │
-│  │ Endpoints    │ (Pinecone)   │ (LiveKit)    │ Service  │ │
-│  └──────────────┴──────────────┴──────────────┴──────────┘ │
+│                    Backend (FastAPI)                        │
+│     ┌──────────────┬──────────────┬──────────────┐          │
+│     │ Research     │ RAG Engine   │ Manim        │          │
+│     │ Endpoints    │ (Pinecone)   │ Service      │          │
+│     └──────────────┴──────────────┴──────────────┘          │
 └───────────────────────────┬─────────────────────────────────┘
                             │
-        ┌───────────────────┼───────────────────┐
-        │                   │                   │
-┌───────▼────────┐  ┌──────▼──────┐  ┌────────▼────────┐
-│ Cerebras LLM   │  │ Exa Search  │  │ Pinecone Vector │
-│ (Llama 4)      │  │ API         │  │ Database        │
-└────────────────┘  └─────────────┘  └─────────────────┘
+        ┌───────────────────-───────────────────┐
+        │                                       │
+┌───────▼────────┐                     ┌────────▼────────┐
+│ Cerebras LLM   │                     │ Pinecone Vector │
+│ (Llama 4)      │                     │ Database        │
+└────────────────┘                     └─────────────────┘
 ```
 
 ---
@@ -126,7 +113,6 @@ Enable students to learn mathematics more effectively by providing AI-powered co
 | **Tailwind CSS**   | Styling framework               | 4.x     |
 | **openapi-fetch**  | Type-safe API client            | 0.14.1  |
 | **Radix UI**       | Accessible components           | Latest  |
-| **LiveKit**        | Real-time voice/video           | 2.x     |
 | **KaTeX**          | LaTeX rendering                 | 0.16.23 |
 | **Framer Motion**  | Animations                      | 12.x    |
 
@@ -137,12 +123,10 @@ Enable students to learn mathematics more effectively by providing AI-powered co
 | **FastAPI**      | Python web framework | 0.118+  |
 | **Uvicorn**      | ASGI server          | Latest  |
 | **Cerebras SDK** | LLM inference        | 0.1.3   |
-| **Exa**          | Web search API       | 1.0.10  |
 | **Pinecone**     | Vector database      | 7.3.0   |
 | **LangChain**    | LLM orchestration    | Latest  |
 | **PyMuPDF**      | PDF processing       | 1.24.1  |
 | **Manim**        | Animation engine     | 0.18.0  |
-| **LiveKit**      | Voice agent server   | 0.17.0  |
 | **Pydantic**     | Data validation      | 2.11.9  |
 
 ### Development Tools
@@ -171,8 +155,8 @@ Ensure you have the following installed:
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/suryansh777777/mathematiks.git
-   cd mathematiks
+   git clone https://github.com/suryansh777777/mathmatika.git
+   cd mathmatika
    ```
 
 2. **Install frontend dependencies**
@@ -205,12 +189,6 @@ Ensure you have the following installed:
    ```env
    # API Configuration
    NEXT_PUBLIC_API_URL=http://localhost:8000
-
-   # LiveKit (for voice mentor)
-   LIVEKIT_API_KEY=your_livekit_api_key
-   LIVEKIT_API_SECRET=your_livekit_api_secret
-   LIVEKIT_URL=wss://your-project.livekit.cloud
-   NEXT_PUBLIC_LIVEKIT_URL=wss://your-project.livekit.cloud
    ```
 
 3. **Configure backend API keys**
@@ -219,31 +197,17 @@ Ensure you have the following installed:
 
    ```env
    # Required API Keys
-   EXA_API_KEY=your_exa_api_key
    CEREBRAS_API_KEY=your_cerebras_api_key
 
    # Optional (for RAG features)
    PINECONE_API_KEY=your_pinecone_api_key
    PINECONE_ENVIRONMENT=your_pinecone_environment
-
-   # Optional (for voice features)
-   DEEPGRAM_API_KEY=your_deepgram_api_key
-   OPENAI_API_KEY=your_openai_api_key
-
-   # LiveKit
-   LIVEKIT_API_KEY=your_livekit_api_key
-   LIVEKIT_API_SECRET=your_livekit_api_secret
-   LIVEKIT_URL=wss://your-project.livekit.cloud
    ```
 
 #### API Key Providers
 
 - **Cerebras** - [cerebras.ai](https://cerebras.ai) - AI inference
-- **Exa** - [exa.ai](https://exa.ai) - Web search API
 - **Pinecone** - [pinecone.io](https://pinecone.io) - Vector database
-- **LiveKit** - [livekit.io](https://livekit.io) - Real-time voice
-- **Deepgram** - [deepgram.com](https://deepgram.com) - Speech-to-text
-- **OpenAI** - [platform.openai.com](https://platform.openai.com) - TTS
 
 ---
 
@@ -318,7 +282,7 @@ When you modify the FastAPI backend schema:
 ## Project Structure
 
 ```
-mathematiks/
+mathmatika/
 ├── app/                        # Next.js App Router
 │   ├── (dashboard)/           # Dashboard routes (grouped)
 │   ├── (landing)/             # Landing page routes
@@ -330,8 +294,7 @@ mathematiks/
 ├── components/                # React components
 │   ├── ui/                    # Base UI components (Radix)
 │   ├── chat/                  # Chat interface components
-│   ├── research/              # Research UI components
-│   └── voice/                 # Voice mentor components
+│   └── research/              # Research UI components
 │
 ├── lib/                       # Shared utilities
 │   ├── api/                   # API client & hooks
@@ -351,7 +314,6 @@ mathematiks/
 │   │   ├── research/          # Research endpoints & logic
 │   │   ├── rag/               # RAG (PDF processing, vector DB)
 │   │   ├── chat/              # Chat endpoints
-│   │   ├── voice/             # Voice mentor (LiveKit agents)
 │   │   └── manim/             # Video generation (Manim)
 │   ├── pyproject.toml         # Python dependencies
 │   └── uv.lock                # uv lockfile
@@ -460,12 +422,6 @@ Interactive chat with AI mentor
 
 Retrieve chat history
 
-### Voice Endpoints
-
-#### `POST /voice/token`
-
-Generate LiveKit access token for voice session
-
 ### OpenAPI Documentation
 
 Once the server is running, visit:
@@ -478,27 +434,12 @@ Once the server is running, visit:
 
 ## Core Modules
 
-### Research Engine
-
-Powered by **Exa** (web search) + **Cerebras LLM** (Llama 4)
-
-- **Basic**: Single-pass synthesis
-- **Deep**: Two-layer with refinement
-- **Multi-Agent**: Parallel subtask decomposition
-
 ### RAG System
 
 - **PDF Processing**: PyMuPDF for text extraction
 - **Embeddings**: HuggingFace sentence-transformers
 - **Vector Store**: Pinecone with semantic search
 - **Chain**: LangChain for orchestration
-
-### Voice Mentor
-
-- **Framework**: LiveKit agents
-- **STT**: Deepgram for speech recognition
-- **TTS**: OpenAI voices
-- **VAD**: Silero for voice activity detection
 
 ### Video Generation
 
@@ -535,10 +476,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - **Cerebras** - Ultra-fast LLM inference
-- **Exa** - Intelligent web search
-- **Anthropic** - Multi-agent research inspiration
 - **Manim Community** - Mathematical animations
-- **LiveKit** - Real-time communication infrastructure
 
 ---
 
@@ -546,7 +484,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions or issues:
 
-- **GitHub Issues**: [Create an issue](https://github.com/suryansh777777/mathematiks/issues)
+- **GitHub Issues**: [Create an issue](https://github.com/suryansh777777/mathmatika/issues)
 - **Documentation**: See `/docs` directory (if available)
 - **Developer Guide**: See `CLAUDE.md`
 
