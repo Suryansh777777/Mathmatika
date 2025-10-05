@@ -20,10 +20,6 @@ class ManimGenerateRequest(BaseModel):
         default="low",
         description="Render quality for the animation"
     )
-    use_ai: bool = Field(
-        default=True,
-        description="Whether to use AI generation if no template matches"
-    )
 
 
 class ManimGenerateResponse(BaseModel):
@@ -57,21 +53,3 @@ class ManimGenerateResponse(BaseModel):
         None,
         description="Additional error details if available"
     )
-
-
-class ManimTemplateInfo(BaseModel):
-    """Information about available Manim templates."""
-    
-    name: str = Field(..., description="Template name")
-    keywords: list[str] = Field(..., description="Keywords that trigger this template")
-    description: str = Field(..., description="What this template visualizes")
-
-
-class ManimTemplatesResponse(BaseModel):
-    """Response model for listing available templates."""
-    
-    templates: list[ManimTemplateInfo] = Field(
-        ...,
-        description="List of available Manim templates"
-    )
-    total: int = Field(..., description="Total number of templates")

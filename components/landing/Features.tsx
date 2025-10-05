@@ -1,26 +1,64 @@
-"use client"
+"use client";
 
-import { siteConfig } from "@/config/siteConfig"
-import { Badge } from "@/components/shared/Badge"
-import SmartSimpleBrilliant from "@/components/smart-simple-brilliant"
-import YourWorkInSync from "@/components/your-work-in-sync"
-import EffortlessIntegration from "@/components/effortless-integration-updated"
-import NumbersThatSpeak from "@/components/numbers-that-speak"
+import { siteConfig } from "@/config/siteConfig";
+import { Badge } from "@/components/shared/Badge";
+import { BentoIcons } from "./icons";
 
 export function Features() {
-  const { bentoGrid } = siteConfig
+  const { bentoGrid } = siteConfig;
 
   return (
-    <div className="w-full border-b border-[rgba(55,50,47,0.12)] flex flex-col justify-center items-center">
+    <div
+      className="w-full border-b border-[rgba(55,50,47,0.12)] flex flex-col justify-center items-center"
+      id="features"
+    >
       <div className="self-stretch px-4 sm:px-6 md:px-8 lg:px-0 lg:max-w-[1060px] lg:w-[1060px] py-8 sm:py-12 md:py-16 border-b border-[rgba(55,50,47,0.12)] flex justify-center items-center gap-6">
-        <div className="w-full max-w-[616px] lg:w-[616px] px-4 sm:px-6 py-4 sm:py-5 shadow-[0px_2px_4px_rgba(50,45,43,0.06)] overflow-hidden rounded-lg flex flex-col justify-start items-center gap-3 sm:gap-4 shadow-none">
+        <div className="w-full max-w-[616px] lg:w-[616px] px-4 sm:px-6 py-4 sm:py-5 overflow-hidden rounded-lg flex flex-col justify-start items-center gap-3 sm:gap-4 shadow-none">
           <Badge
             icon={
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1" y="1" width="4" height="4" stroke="#37322F" strokeWidth="1" fill="none" />
-                <rect x="7" y="1" width="4" height="4" stroke="#37322F" strokeWidth="1" fill="none" />
-                <rect x="1" y="7" width="4" height="4" stroke="#37322F" strokeWidth="1" fill="none" />
-                <rect x="7" y="7" width="4" height="4" stroke="#37322F" strokeWidth="1" fill="none" />
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  x="1"
+                  y="1"
+                  width="4"
+                  height="4"
+                  stroke="#37322F"
+                  strokeWidth="1"
+                  fill="none"
+                />
+                <rect
+                  x="7"
+                  y="1"
+                  width="4"
+                  height="4"
+                  stroke="#37322F"
+                  strokeWidth="1"
+                  fill="none"
+                />
+                <rect
+                  x="1"
+                  y="7"
+                  width="4"
+                  height="4"
+                  stroke="#37322F"
+                  strokeWidth="1"
+                  fill="none"
+                />
+                <rect
+                  x="7"
+                  y="7"
+                  width="4"
+                  height="4"
+                  stroke="#37322F"
+                  strokeWidth="1"
+                  fill="none"
+                />
               </svg>
             }
             text={bentoGrid.badge.text}
@@ -45,7 +83,7 @@ export function Features() {
             {Array.from({ length: 200 }).map((_, i) => (
               <div
                 key={i}
-                className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
+                className="self-stretch h-3 sm:h-4 rotate-[-45deg] origin-top-left outline sm:outline-[0.5px] outline-[rgba(3,7,18,0.08)] outline-offset-[-0.25px]"
               />
             ))}
           </div>
@@ -63,12 +101,7 @@ export function Features() {
               </p>
             </div>
             <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex items-center justify-center overflow-hidden">
-              <SmartSimpleBrilliant
-                width="100%"
-                height="100%"
-                theme="light"
-                className="scale-50 sm:scale-65 md:scale-75 lg:scale-90"
-              />
+              <BentoIcons.BentoOne className="w-full h-full" />
             </div>
           </div>
 
@@ -83,7 +116,7 @@ export function Features() {
               </p>
             </div>
             <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden text-right items-center justify-center">
-              <YourWorkInSync width="400" height="250" theme="light" className="scale-60 sm:scale-75 md:scale-90" />
+              <BentoIcons.BentoTwo className="w-full h-full" />
             </div>
           </div>
 
@@ -99,7 +132,7 @@ export function Features() {
             </div>
             <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden justify-center items-center relative bg-transparent">
               <div className="w-full h-full flex items-center justify-center bg-transparent">
-                <EffortlessIntegration width={400} height={250} className="max-w-full max-h-full" />
+                <BentoIcons.BentoThird className="w-full h-full" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#F7F5F3] to-transparent pointer-events-none"></div>
             </div>
@@ -117,12 +150,7 @@ export function Features() {
             </div>
             <div className="w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-lg flex overflow-hidden items-center justify-center relative">
               <div className="absolute inset-0 flex items-center justify-center">
-                <NumbersThatSpeak
-                  width="100%"
-                  height="100%"
-                  theme="light"
-                  className="w-full h-full object-contain"
-                />
+                <BentoIcons.BentoFourth className="w-full h-full" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#F7F5F3] to-transparent pointer-events-none"></div>
             </div>
@@ -141,5 +169,5 @@ export function Features() {
         </div>
       </div>
     </div>
-  )
+  );
 }

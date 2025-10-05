@@ -1,15 +1,9 @@
-"use client"
-
-import { Navigation } from "@/components/landing/Navigation"
-import { Hero } from "@/components/landing/Hero"
-import { SocialProof } from "@/components/landing/SocialProof"
-import { Features } from "@/components/landing/Features"
-import { Documentation } from "@/components/landing/Documentation"
-import { Testimonials } from "@/components/landing/Testimonials"
-import { Pricing } from "@/components/landing/Pricing"
-import { FAQ } from "@/components/landing/FAQ"
-import { CTA } from "@/components/landing/CTA"
-import { Footer } from "@/components/landing/Footer"
+import { Navigation } from "@/components/landing/Navigation";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { FAQ } from "@/components/landing/FAQ";
+import { CTA } from "@/components/landing/CTA";
+import { Footer } from "@/components/landing/Footer";
 
 export default function LandingPage() {
   return (
@@ -27,15 +21,7 @@ export default function LandingPage() {
 
             <Hero />
 
-            <SocialProof />
-
             <Features />
-
-            <Documentation />
-
-            <Testimonials />
-
-            <Pricing />
 
             <FAQ />
 
@@ -46,5 +32,5 @@ export default function LandingPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

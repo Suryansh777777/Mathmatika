@@ -1,171 +1,171 @@
 "use client";
 
-import { useState } from "react";
-import {
-  useResearch,
-  useDeepResearch,
-  useMultiAgentResearch,
-} from "@/lib/api/hooks";
+import ChatPrompt, { DRAFT_KEY } from "@/components/chat/chat-prompt";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Icon } from "@/components/icon";
+import { IconType } from "@/lib/icons";
+import { cn } from "@/lib/utils";
+import { useLocalStorage } from "usehooks-ts";
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
-  const [query, setQuery] = useState("");
+const promptSuggestions: Record<
+  string,
+  { title: string; icon: IconType; prompts: string[] }
+> = {
+  create: {
+    title: "Create",
+    icon: "create",
+    prompts: [
+      "Generate practice problems for quadratic equations",
+      "Create a step-by-step guide for integration by parts",
+      "Design a visual proof of the Pythagorean theorem",
+      "Build a study schedule for calculus exam prep",
+    ],
+  },
+  explore: {
+    title: "Explore",
+    icon: "explore",
+    prompts: [
+      "What are the real-world applications of linear algebra?",
+      "History of calculus and its impact on science",
+      "Most beautiful mathematical theorems",
+      "How does number theory relate to cryptography?",
+    ],
+  },
+  code: {
+    title: "Code",
+    icon: "code",
+    prompts: [
+      "Write Python code to solve a system of linear equations",
+      "Implement the Euclidean algorithm in JavaScript",
+      "Create a matrix multiplication function",
+      "Code a numerical derivative calculator",
+    ],
+  },
+  learn: {
+    title: "Learn",
+    icon: "learn",
+    prompts: [
+      "Explain derivatives using simple analogies",
+      "What is the fundamental theorem of calculus?",
+      "Beginner's guide to trigonometric identities",
+      "How do logarithms work?",
+    ],
+  },
+};
 
-  const research = useResearch();
-  const deepResearch = useDeepResearch();
-  const multiAgentResearch = useMultiAgentResearch();
+export default function ChatHome() {
+  const router = useRouter();
+  const [, setDraft] = useLocalStorage<string>(DRAFT_KEY, "");
+  const [input, setInput] = useState("");
+  const [uploadedPdf, setUploadedPdf] = useState<{
+    filename: string;
+    indexName: string;
+  } | null>(null);
 
-  const handleResearch = () => {
-    if (!query.trim()) return;
-    research.mutate({ query });
+  const handlePdfUpload = useCallback(
+    (info: { filename: string; indexName: string } | null) => {
+      console.log("🏠 Home page - PDF upload:", info);
+      setUploadedPdf(info);
+    },
+    []
+  );
+
+  const handlePromptClick = (prompt: string) => {
+    setInput(prompt);
+    setDraft(prompt);
   };
 
-  const handleDeepResearch = () => {
-    if (!query.trim()) return;
-    deepResearch.mutate({ query });
-  };
-
-  const handleMultiAgentResearch = () => {
-    if (!query.trim()) return;
-    multiAgentResearch.mutate({ query });
+  const handleAppend = async (message: string) => {
+    // Create a new thread ID and navigate with the message
+    const threadId = Date.now().toString();
+    // Store the message so the chat page can pick it up
+    sessionStorage.setItem(`chat-initial-${threadId}`, message);
+    // Store PDF info if available - CRITICAL: must persist for RAG queries
+    if (uploadedPdf) {
+      console.log(
+        "📎 [HOME] Storing PDF info for thread:",
+        threadId,
+        uploadedPdf
+      );
+      sessionStorage.setItem(
+        `chat-pdf-${threadId}`,
+        JSON.stringify(uploadedPdf)
+      );
+    }
+    router.push(`/chat/${threadId}`);
   };
 
   return (
-    <div className="font-sans min-h-screen p-8 max-w-4xl mx-auto">
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Mathematiks</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          AI-Powered Research Assistant
-        </p>
-      </header>
-
-      <main className="space-y-6">
-        {/* Input Section */}
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="query" className="block text-sm font-medium mb-2">
-              Research Query
-            </label>
-            <input
-              id="query"
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleResearch();
-              }}
-              placeholder="Enter your research question..."
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3 flex-wrap">
-            <button
-              onClick={handleResearch}
-              disabled={!query.trim() || research.isPending}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+    <>
+      <ChatPrompt
+        input={input}
+        setInput={setInput}
+        append={handleAppend}
+        uploadedPdfInfo={uploadedPdf}
+        onPdfUpload={handlePdfUpload}
+      />
+      <div
+        className="absolute inset-0 overflow-y-scroll sm:pt-3.5 pb-[144px] smooth-scroll"
+        style={{ scrollbarGutter: "stable both-edges" }}
+      >
+        <div
+          role="log"
+          aria-label="Chat messages"
+          aria-live="polite"
+          className="mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 py-10"
+        >
+          <div className="flex h-[calc(100vh-20rem)] items-start justify-center ">
+            <div
+              className={cn(
+                "w-full space-y-6 px-2 pt-[calc(max(15vh,2.5rem))] duration-300 animate-in fade-in-50 zoom-in-95 sm:px-8"
+              )}
             >
-              {research.isPending ? "Researching..." : "Basic Research"}
-            </button>
-
-            <button
-              onClick={handleDeepResearch}
-              disabled={!query.trim() || deepResearch.isPending}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-            >
-              {deepResearch.isPending ? "Researching..." : "Deep Research"}
-            </button>
-
-            <button
-              onClick={handleMultiAgentResearch}
-              disabled={!query.trim() || multiAgentResearch.isPending}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-            >
-              {multiAgentResearch.isPending
-                ? "Researching..."
-                : "Multi-Agent Research"}
-            </button>
+              <h2 className="text-3xl font-semibold text-[#37322f] animate-slide-up">
+                How can I help you with mathematics today?
+              </h2>
+              <Tabs
+                defaultValue={Object.keys(promptSuggestions)[0]}
+                className="gap-6 animate-slide-up [animation-delay:100ms]"
+              >
+                <TabsList className="gap-2.5 text-sm max-sm:justify-evenly bg-transparent p-0">
+                  {Object.keys(promptSuggestions).map((key) => (
+                    <TabsTrigger key={key} value={key}>
+                      <Icon
+                        name={promptSuggestions[key].icon}
+                        className="max-sm:block"
+                      />
+                      {promptSuggestions[key].title}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {Object.keys(promptSuggestions).map((key) => (
+                  <TabsContent value={key} key={key}>
+                    {promptSuggestions[key].prompts.map((prompt, index) => (
+                      <div
+                        key={index}
+                        className="border-t border-[#d4cfc8]/40 py-1 first:border-none animate-slide-up"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <button
+                          onMouseDown={() => handlePromptClick(prompt)}
+                          className="w-full rounded-md py-2.5 px-3 text-left text-[#5a5550] hover:bg-[#e8e4df]/50 cursor-pointer transition-all duration-150 group relative overflow-hidden"
+                        >
+                          <span className="group-hover:text-[#37322f] transition-colors duration-150 relative z-10">
+                            {prompt}
+                          </span>
+                          <div className="absolute inset-y-0 left-0 w-1 bg-[#37322f] scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></div>
+                        </button>
+                      </div>
+                    ))}
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </div>
           </div>
         </div>
-
-        {/* Results Section */}
-        <div className="space-y-6">
-          {/* Basic Research Result */}
-          {(research.data || research.error) && (
-            <div className="border border-blue-500 rounded-lg p-4 bg-blue-50 dark:bg-blue-950">
-              <h2 className="text-lg font-semibold mb-2 text-blue-900 dark:text-blue-100">
-                Basic Research
-              </h2>
-              {research.error && (
-                <p className="text-red-600 dark:text-red-400">
-                  Error: {research.error.message}
-                </p>
-              )}
-              {research.data && (
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Sources: {research.data.sources}
-                  </p>
-                  <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                    {research.data.response}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Deep Research Result */}
-          {(deepResearch.data || deepResearch.error) && (
-            <div className="border border-purple-500 rounded-lg p-4 bg-purple-50 dark:bg-purple-950">
-              <h2 className="text-lg font-semibold mb-2 text-purple-900 dark:text-purple-100">
-                Deep Research
-              </h2>
-              {deepResearch.error && (
-                <p className="text-red-600 dark:text-red-400">
-                  Error: {deepResearch.error.message}
-                </p>
-              )}
-              {deepResearch.data && (
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Sources: {deepResearch.data.sources}
-                  </p>
-                  <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                    {deepResearch.data.response}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Multi-Agent Research Result */}
-          {(multiAgentResearch.data || multiAgentResearch.error) && (
-            <div className="border border-green-500 rounded-lg p-4 bg-green-50 dark:bg-green-950">
-              <h2 className="text-lg font-semibold mb-2 text-green-900 dark:text-green-100">
-                Multi-Agent Research
-              </h2>
-              {multiAgentResearch.error && (
-                <p className="text-red-600 dark:text-red-400">
-                  Error: {multiAgentResearch.error.message}
-                </p>
-              )}
-              {multiAgentResearch.data && (
-                <div className="space-y-2">
-                  <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-400">
-                    <span>Subagents: {multiAgentResearch.data.subagents}</span>
-                    <span>
-                      Total Sources: {multiAgentResearch.data.total_sources}
-                    </span>
-                  </div>
-                  <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                    {multiAgentResearch.data.synthesis}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
 }

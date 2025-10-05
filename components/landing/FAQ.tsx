@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { siteConfig } from "@/config/siteConfig"
+import { useState } from "react";
+import { siteConfig } from "@/config/siteConfig";
 
 function ChevronDownIcon({ className }: { className?: string }) {
   return (
@@ -13,22 +13,30 @@ function ChevronDownIcon({ className }: { className?: string }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="m6 9 6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
-  )
+  );
 }
 
 export function FAQ() {
-  const [openItems, setOpenItems] = useState<number[]>([])
+  const [openItems, setOpenItems] = useState<number[]>([]);
 
   const toggleItem = (index: number) => {
-    setOpenItems((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]))
-  }
+    setOpenItems((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
 
-  const { faq } = siteConfig
+  const { faq } = siteConfig;
 
   return (
-    <div className="w-full flex justify-center items-start">
+    <div className="w-full flex justify-center items-start" id="FAQ">
       <div className="flex-1 px-4 md:px-12 py-16 md:py-20 flex flex-col lg:flex-row justify-start items-start gap-6 lg:gap-12">
         <div className="w-full lg:flex-1 flex flex-col justify-center items-start gap-4 lg:py-5">
           <div className="w-full flex flex-col justify-center text-[#49423D] font-semibold leading-tight md:leading-[44px] font-sans text-4xl tracking-tight">
@@ -38,7 +46,9 @@ export function FAQ() {
             {faq.description.split("\n").map((line, i) => (
               <span key={i}>
                 {line}
-                {i < faq.description.split("\n").length - 1 && <br className="hidden md:block" />}
+                {i < faq.description.split("\n").length - 1 && (
+                  <br className="hidden md:block" />
+                )}
               </span>
             ))}
           </div>
@@ -47,10 +57,13 @@ export function FAQ() {
         <div className="w-full lg:flex-1 flex flex-col justify-center items-center">
           <div className="w-full flex flex-col">
             {faq.items.map((item, index) => {
-              const isOpen = openItems.includes(index)
+              const isOpen = openItems.includes(index);
 
               return (
-                <div key={index} className="w-full border-b border-[rgba(73,66,61,0.16)] overflow-hidden">
+                <div
+                  key={index}
+                  className="w-full border-b border-[rgba(73,66,61,0.16)] overflow-hidden"
+                >
                   <button
                     onClick={() => toggleItem(index)}
                     className="w-full px-5 py-[18px] flex justify-between items-center gap-5 text-left hover:bg-[rgba(73,66,61,0.02)] transition-colors duration-200"
@@ -78,11 +91,11 @@ export function FAQ() {
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

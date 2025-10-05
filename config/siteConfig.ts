@@ -8,8 +8,7 @@ export const siteConfig = {
   nav: {
     links: [
       { name: "Features", href: "#features" },
-      { name: "Pricing", href: "#pricing" },
-      { name: "How it Works", href: "#docs" },
+      { name: "Faq", href: "#FAQ" },
     ],
     cta: { text: "Get Started", href: "/chat" },
   },
@@ -53,9 +52,9 @@ export const siteConfig = {
           "Upload PDFs, images, or text and get beautifully formatted notes with LaTeX equations in minutes.",
       },
       {
-        title: "Interactive Quizzes",
+        title: "Interactive Videos",
         description:
-          "Test your understanding with AI-generated quizzes and get instant feedback with detailed explanations.",
+          "Test your understanding with AI-generated videos and get instant feedback with detailed explanations.",
       },
       {
         title: "AI Mentorship",

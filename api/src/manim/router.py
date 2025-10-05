@@ -5,16 +5,12 @@ FastAPI router for Manim animation generation endpoints.
 import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
-from pathlib import Path
 
 from .models import (
     ManimGenerateRequest,
     ManimGenerateResponse,
-    ManimTemplatesResponse,
-    ManimTemplateInfo
 )
 from .service import ManimService
-from .templates import get_available_templates
 
 logger = logging.getLogger(__name__)
 
@@ -36,17 +32,14 @@ async def generate_animation(request: ManimGenerateRequest):
     
     This endpoint accepts a concept (text or LaTeX) and generates an animated
     video visualization using Manim. It supports:
-    - LaTeX expressions (automatically detected)
-    - Template-based generation for common concepts
     - AI-powered generation using Llama models via OpenRouter
     - Multiple render quality options (low, medium, high)
     """
     try:
         # Generate the animation
-        result = manim_service.render_animation(
+        result = await manim_service.render_animation(
             concept=request.concept,
             quality=request.quality,
-            use_ai=request.use_ai
         )
         
         # Convert the result to response model
@@ -58,39 +51,6 @@ async def generate_animation(request: ManimGenerateRequest):
             status_code=500,
             detail=f"Failed to generate animation: {str(e)}"
         )
-
-
-@router.get("/templates", response_model=ManimTemplatesResponse)
-async def list_templates():
-    """
-    List all available Manim templates.
-    
-    Returns information about pre-built templates that can be triggered
-    by specific keywords in the concept text.
-    """
-    try:
-        templates = get_available_templates()
-        template_infos = [
-            ManimTemplateInfo(
-                name=t["name"],
-                keywords=t["keywords"],
-                description=t["description"]
-            )
-            for t in templates
-        ]
-        
-        return ManimTemplatesResponse(
-            templates=template_infos,
-            total=len(template_infos)
-        )
-        
-    except Exception as e:
-        logger.error(f"Error listing templates: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to list templates: {str(e)}"
-        )
-
 
 @router.get("/videos/{filename}")
 async def serve_video(filename: str):
