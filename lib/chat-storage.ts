@@ -19,7 +19,7 @@ export interface ChatThread {
   lastMessagePreview?: string;
 }
 
-const STORAGE_KEY = "mathematika_chat_threads";
+const STORAGE_KEY = "mathmatika_chat_threads";
 
 /**
  * Get all chat threads from localStorage

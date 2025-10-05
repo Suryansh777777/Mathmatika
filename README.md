@@ -1,4 +1,4 @@
-# Mathematiks
+# Mathmatika
 
 > AI-Powered Mathematics Learning Platform with Research, RAG, Voice Mentorship, and Video Generation
 
@@ -30,7 +30,7 @@
 
 ## Overview
 
-**Mathematiks** is a comprehensive mathematics learning platform that combines AI-powered research, document processing, interactive chat, voice mentorship, and video generation to transform how students learn mathematics. The platform enables users to upload materials, ask questions, and receive structured notes, educational videos, and interactive assessments—all powered by cutting-edge AI technology.
+**Mathmatika** is a comprehensive mathematics learning platform that combines AI-powered research, document processing, interactive chat, voice mentorship, and video generation to transform how students learn mathematics. The platform enables users to upload materials, ask questions, and receive structured notes, educational videos, and interactive assessments—all powered by cutting-edge AI technology.
 
 ### Vision
 
@@ -171,8 +171,8 @@ Ensure you have the following installed:
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/suryansh777777/mathematiks.git
-   cd mathematiks
+   git clone https://github.com/suryansh777777/mathmatika.git
+   cd mathmatika
    ```
 
 2. **Install frontend dependencies**
@@ -318,7 +318,7 @@ When you modify the FastAPI backend schema:
 ## Project Structure
 
 ```
-mathematiks/
+mathmatika/
 ├── app/                        # Next.js App Router
 │   ├── (dashboard)/           # Dashboard routes (grouped)
 │   ├── (landing)/             # Landing page routes
@@ -546,7 +546,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions or issues:
 
-- **GitHub Issues**: [Create an issue](https://github.com/suryansh777777/mathematiks/issues)
+- **GitHub Issues**: [Create an issue](https://github.com/suryansh777777/mathmatika/issues)
 - **Documentation**: See `/docs` directory (if available)
 - **Developer Guide**: See `CLAUDE.md`
 

@@ -93,7 +93,7 @@ export default function ThreadList({ searchQuery = "" }: ThreadListProps) {
       if (typeof window === "undefined") return;
 
       try {
-        const stored = localStorage.getItem("mathematika_chat_threads");
+        const stored = localStorage.getItem("mathmatika_chat_threads");
         if (stored) {
           const allThreads = JSON.parse(stored);
           setThreads(allThreads);
