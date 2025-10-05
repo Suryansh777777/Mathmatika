@@ -6,11 +6,15 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarMenuAction,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { useEffect, useState } from "react";
+import { Trash2 } from "lucide-react";
+import { deleteThread } from "@/lib/chat-storage";
+import { useParams, useRouter } from "next/navigation";
 
 // Mock data structure - replace with your actual data source
 interface Thread {
@@ -79,6 +83,9 @@ interface ThreadListProps {
 
 export default function ThreadList({ searchQuery = "" }: ThreadListProps) {
   const [threads, setThreads] = useState<Thread[]>([]);
+  const params = useParams();
+  const router = useRouter();
+  const currentThreadId = params?.id as string | undefined;
 
   // Load threads from localStorage
   useEffect(() => {
@@ -113,6 +120,20 @@ export default function ThreadList({ searchQuery = "" }: ThreadListProps) {
   );
 
   const groupedThreads = groupThreadsByPeriod(filteredThreads);
+
+  const handleDeleteThread = (threadId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (confirm("Are you sure you want to delete this conversation?")) {
+      deleteThread(threadId);
+
+      // If we're currently viewing this thread, redirect to chat home
+      if (currentThreadId === threadId) {
+        router.push("/chat");
+      }
+    }
+  };
 
   return (
     <div className="relative flex-1">
@@ -153,7 +174,7 @@ export default function ThreadList({ searchQuery = "" }: ThreadListProps) {
                       <SidebarMenuItem>
                         <Link
                           href={`/chat/${conversation.id}`}
-                          className="group/link relative flex h-9 w-full items-center overflow-hidden rounded-lg px-3 py-2 text-sm outline-none hover:bg-[#e8e4df]/60 focus-visible:bg-[#e8e4df]/60 focus-visible:ring-1 focus-visible:ring-[#8b7d70]/20 active:scale-98 transition-all duration-150"
+                          className="group/link relative flex h-9 w-full items-center overflow-hidden rounded-lg px-3 py-2 pr-8 text-sm outline-none hover:bg-[#e8e4df]/60 focus-visible:bg-[#e8e4df]/60 focus-visible:ring-1 focus-visible:ring-[#8b7d70]/20 active:scale-98 transition-all duration-150"
                         >
                           <div className="relative flex w-full items-center min-w-0">
                             <span className="truncate text-sm text-[#5a5550] group-hover/link:text-[#37322f] transition-colors duration-150 font-medium">
@@ -162,6 +183,14 @@ export default function ThreadList({ searchQuery = "" }: ThreadListProps) {
                           </div>
                           <div className="absolute inset-y-0 left-0 w-0.5 bg-[#37322f] scale-y-0 group-hover/link:scale-y-100 transition-transform duration-200 origin-center rounded-r-full"></div>
                         </Link>
+                        <SidebarMenuAction
+                          onClick={(e) => handleDeleteThread(conversation.id, e)}
+                          showOnHover
+                          className="text-[#8b7d70]/60 hover:text-red-500 hover:bg-red-50 transition-colors duration-150"
+                        >
+                          <Trash2 className="size-3.5" />
+                          <span className="sr-only">Delete conversation</span>
+                        </SidebarMenuAction>
                       </SidebarMenuItem>
                     </span>
                   ))}

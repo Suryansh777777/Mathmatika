@@ -56,7 +56,7 @@ export function Testimonials() {
                   transition: "filter 0.7s ease-in-out",
                 }}
               >
-                "{testimonials[activeTestimonial].quote}"
+                &quot;{testimonials[activeTestimonial].quote}&quot;
               </div>
               <div
                 className="self-stretch flex flex-col justify-start items-start gap-1 transition-all duration-700 ease-in-out"

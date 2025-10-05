@@ -58,7 +58,7 @@ export function Message({ message, messageId, role, model }: MessageProps) {
         <span className="sr-only">
           {isUser ? "Your message: " : "Assistant Reply: "}
         </span>
-        <div className="prose prose-stone max-w-none prose-pre:m-0 prose-pre:bg-transparent prose-pre:p-0 prose-p:text-[#37322f] prose-p:my-0 space-y-1">
+        <div className="prose prose-stone max-w-none prose-pre:m-0 prose-pre:bg-transparent prose-pre:p-0 prose-p:text-[#37322f] prose-p:my-0 space-y-2">
           <ReactMarkdown
             remarkPlugins={[remarkMath, remarkGfm]}
             rehypePlugins={[rehypeKatex]}

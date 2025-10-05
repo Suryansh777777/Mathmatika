@@ -20,6 +20,8 @@ interface ChatPromptProps {
   append: (message: string) => Promise<void>;
   videoEnabled?: boolean;
   onVideoToggle?: (enabled: boolean) => void;
+  voiceEnabled?: boolean;
+  onVoiceToggle?: (enabled: boolean) => void;
   enableVideoLayout?: boolean;
 }
 
@@ -30,7 +32,7 @@ const modelRegistry = {
   "gemini-2.0": { provider: "google", modelId: "gemini-2.0-flash" },
 };
 
-export default function ChatPrompt({ input, setInput, append, videoEnabled = false, onVideoToggle, enableVideoLayout = false }: ChatPromptProps) {
+export default function ChatPrompt({ input, setInput, append, videoEnabled = false, onVideoToggle, voiceEnabled = false, onVoiceToggle, enableVideoLayout = false }: ChatPromptProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [draft, setDraft, removeDraft] = useLocalStorage<string>(DRAFT_KEY, "");
@@ -87,7 +89,7 @@ export default function ChatPrompt({ input, setInput, append, videoEnabled = fal
   };
 
   return (
-    <PromptWrapper videoEnabled={enableVideoLayout && videoEnabled}>
+    <PromptWrapper videoEnabled={enableVideoLayout && (videoEnabled || voiceEnabled)}>
       <form
         ref={formRef}
         className="relative flex w-full flex-col items-stretch gap-2 rounded-t-xl border border-b-0 border-[#d4cfc8]/70 glass-dark px-3 pt-3 text-secondary-foreground outline-8 outline-[#e8e4df]/50 pb-3 max-sm:pb-6 sm:max-w-3xl shadow-elegant-lg transition-shadow duration-200"
@@ -124,6 +126,8 @@ export default function ChatPrompt({ input, setInput, append, videoEnabled = fal
               setModel={setModel}
               videoEnabled={videoEnabled}
               onVideoToggle={onVideoToggle}
+              voiceEnabled={voiceEnabled}
+              onVoiceToggle={onVoiceToggle}
             />
           </div>
         </div>
@@ -160,14 +164,34 @@ const PromptActions = ({
   setModel,
   videoEnabled,
   onVideoToggle,
+  voiceEnabled,
+  onVoiceToggle,
 }: {
   model: string;
   setModel: (model: string) => void;
   videoEnabled?: boolean;
   onVideoToggle?: (enabled: boolean) => void;
+  voiceEnabled?: boolean;
+  onVoiceToggle?: (enabled: boolean) => void;
 }) => {
   const handleClick = (key: string) => {
     setModel(key);
+  };
+
+  const handleVoiceToggle = () => {
+    // Turn off video if voice is being enabled
+    if (!voiceEnabled && videoEnabled) {
+      onVideoToggle?.(false);
+    }
+    onVoiceToggle?.(!voiceEnabled);
+  };
+
+  const handleVideoToggle = () => {
+    // Turn off voice if video is being enabled
+    if (!videoEnabled && voiceEnabled) {
+      onVoiceToggle?.(false);
+    }
+    onVideoToggle?.(!videoEnabled);
   };
 
   return (
@@ -217,7 +241,7 @@ const PromptActions = ({
         <Button
           variant="outline"
           type="button"
-          onClick={() => onVideoToggle?.(!videoEnabled)}
+          onClick={handleVideoToggle}
           className={`text-xs -mb-1.5 h-auto gap-2 rounded-full border border-solid py-1.5 pl-2 pr-2.5 max-sm:p-2 transition-all duration-200 ${
             videoEnabled
               ? "bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/40 text-purple-700 shadow-md hover:shadow-lg"
@@ -231,6 +255,26 @@ const PromptActions = ({
             <span className="absolute -top-1 -right-1 flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+            </span>
+          )}
+        </Button>
+        <Button
+          variant="outline"
+          type="button"
+          onClick={handleVoiceToggle}
+          className={`text-xs -mb-1.5 h-auto gap-2 rounded-full border border-solid py-1.5 pl-2 pr-2.5 max-sm:p-2 transition-all duration-200 ${
+            voiceEnabled
+              ? "bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-500/40 text-blue-700 shadow-md hover:shadow-lg"
+              : "border-[#8b7d70]/10 text-[#5a5550] hover:border-[#8b7d70]/30 hover:shadow-sm"
+          }`}
+          title={voiceEnabled ? "Disable voice assistant" : "Enable voice assistant"}
+        >
+          <span className={voiceEnabled ? "text-lg" : ""}>🎙️</span>
+          <span className="max-sm:hidden">Voice</span>
+          {voiceEnabled && (
+            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
           )}
         </Button>

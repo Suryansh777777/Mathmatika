@@ -13,6 +13,7 @@ import { flushSync } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import { useChatStream, useManimGeneration } from "@/lib/api/hooks";
 import { getThread, addMessageToThread } from "@/lib/chat-storage";
+import { useSidebar } from "@/components/ui/sidebar";
 
 type Role = "user" | "assistant";
 
@@ -38,6 +39,7 @@ export default function ChatConversation() {
   // Hooks
   const chat = useChatStream();
   const manimGeneration = useManimGeneration();
+  const { setOpen, open } = useSidebar();
 
   // Load thread messages on mount
   useEffect(() => {
@@ -56,14 +58,6 @@ export default function ChatConversation() {
       } else {
         // Check for initial message from chat home page
         const initialMessage = sessionStorage.getItem(`chat-initial-${id}`);
-        const videoEnabledState = sessionStorage.getItem(
-          `chat-video-enabled-${id}`
-        );
-
-        if (videoEnabledState) {
-          setVideoEnabled(videoEnabledState === "true");
-          sessionStorage.removeItem(`chat-video-enabled-${id}`);
-        }
 
         if (initialMessage) {
           sessionStorage.removeItem(`chat-initial-${id}`);
@@ -83,6 +77,13 @@ export default function ChatConversation() {
       });
     }
   }, [messages, streamingContent, chat.isStreaming]);
+
+  // Auto-collapse sidebar when video panel opens
+  useEffect(() => {
+    if (videoEnabled && open) {
+      setOpen(false);
+    }
+  }, [videoEnabled, open, setOpen]);
 
   // Generate video when toggling on (if there's a last message)
   useEffect(() => {
