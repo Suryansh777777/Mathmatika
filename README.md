@@ -96,12 +96,12 @@ Enable students to learn mathematics more effectively by providing AI-powered co
 │     └──────────────┴──────────────┴──────────────┘          │
 └───────────────────────────┬─────────────────────────────────┘
                             │
-        ┌───────────────────┼───────────────────┐
-        │                   │                   │
-┌───────▼────────┐   ┌──────▼──────┐   ┌────────▼────────┐
-│ Cerebras LLM   │   │ Exa Search  │   │ Pinecone Vector │
-│ (Llama 4)      │   │ API         │   │ Database        │
-└────────────────┘   └─────────────┘   └─────────────────┘
+        ┌───────────────────-───────────────────┐
+        │                                       │
+┌───────▼────────┐                     ┌────────▼────────┐
+│ Cerebras LLM   │                     │ Pinecone Vector │
+│ (Llama 4)      │                     │ Database        │
+└────────────────┘                     └─────────────────┘
 ```
 
 ---
@@ -129,7 +129,6 @@ Enable students to learn mathematics more effectively by providing AI-powered co
 | **FastAPI**      | Python web framework | 0.118+  |
 | **Uvicorn**      | ASGI server          | Latest  |
 | **Cerebras SDK** | LLM inference        | 0.1.3   |
-| **Exa**          | Web search API       | 1.0.10  |
 | **Pinecone**     | Vector database      | 7.3.0   |
 | **LangChain**    | LLM orchestration    | Latest  |
 | **PyMuPDF**      | PDF processing       | 1.24.1  |
@@ -204,7 +203,6 @@ Ensure you have the following installed:
 
    ```env
    # Required API Keys
-   EXA_API_KEY=your_exa_api_key
    CEREBRAS_API_KEY=your_cerebras_api_key
 
    # Optional (for RAG features)
@@ -215,7 +213,6 @@ Ensure you have the following installed:
 #### API Key Providers
 
 - **Cerebras** - [cerebras.ai](https://cerebras.ai) - AI inference
-- **Exa** - [exa.ai](https://exa.ai) - Web search API
 - **Pinecone** - [pinecone.io](https://pinecone.io) - Vector database
 
 ---
@@ -443,14 +440,6 @@ Once the server is running, visit:
 
 ## Core Modules
 
-### Research Engine
-
-Powered by **Exa** (web search) + **Cerebras LLM** (Llama 4)
-
-- **Basic**: Single-pass synthesis
-- **Deep**: Two-layer with refinement
-- **Multi-Agent**: Parallel subtask decomposition
-
 ### RAG System
 
 - **PDF Processing**: PyMuPDF for text extraction
@@ -493,8 +482,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - **Cerebras** - Ultra-fast LLM inference
-- **Exa** - Intelligent web search
-- **Anthropic** - Multi-agent research inspiration
 - **Manim Community** - Mathematical animations
 
 ---
