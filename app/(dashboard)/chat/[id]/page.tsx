@@ -11,7 +11,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
-import { useChatStream, useManimGeneration } from "@/lib/api/hooks";
+import { useChatStream, useManimGeneration, useRAGQuery } from "@/lib/api/hooks";
 import { getThread, addMessageToThread } from "@/lib/chat-storage";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -35,9 +35,13 @@ export default function ChatConversation() {
   const [videoQuality, setVideoQuality] = useState<VideoQuality>("medium");
   const [videoState, setVideoState] = useState<VideoState>({ status: "idle" });
   const [lastUserMessage, setLastUserMessage] = useState("");
-
+  const [uploadedPdf, setUploadedPdf] = useState<{
+    filename: string;
+    indexName: string;
+  } | null>(null);
   // Hooks
   const chat = useChatStream();
+  const ragQuery = useRAGQuery();
   const manimGeneration = useManimGeneration();
   const { setOpen, open } = useSidebar();
 
@@ -56,18 +60,28 @@ export default function ChatConversation() {
           }))
         );
       } else {
-        // Check for initial message from chat home page
+        // Check for initial message AND PDF info from chat home page
         const initialMessage = sessionStorage.getItem(`chat-initial-${id}`);
+        const pdfInfo = sessionStorage.getItem(`chat-pdf-${id}`);
+
+        let parsedPdfInfo = null;
+        if (pdfInfo) {
+          parsedPdfInfo = JSON.parse(pdfInfo);
+          console.log("📎 [CONV] Retrieved PDF info from session:", parsedPdfInfo);
+          setUploadedPdf(parsedPdfInfo);
+          sessionStorage.removeItem(`chat-pdf-${id}`);
+        }
 
         if (initialMessage) {
           sessionStorage.removeItem(`chat-initial-${id}`);
-          handleAppend(initialMessage);
+          // CRITICAL: Pass PDF info directly to avoid race condition with state
+          console.log("📎 [CONV] Calling handleAppend with PDF:", parsedPdfInfo);
+          handleAppend(initialMessage, parsedPdfInfo);
         }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
   // Auto-scroll to bottom when new messages arrive or streaming content changes
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -119,10 +133,16 @@ export default function ChatConversation() {
     }
   }, [videoEnabled]);
 
-  const handleAppend = async (message: string) => {
+  const handleAppend = async (
+    message: string,
+    pdfInfo?: { filename: string; indexName: string } | null
+  ) => {
     if (!id) {
       return router.push("/chat");
     }
+
+    // Use provided pdfInfo (from initial load) or current state
+    const activePdf = pdfInfo !== undefined ? pdfInfo : uploadedPdf;
 
     // Add user message
     const userMessage: ChatMessage = {
@@ -174,47 +194,92 @@ export default function ChatConversation() {
       );
     }
 
-    // Stream AI response
-    await chat.sendMessage(message, {
-      conversationHistory: messages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-      onChunk: (content) => {
-        flushSync(() => {
-          setStreamingContent((prev) => prev + content);
-        });
-      },
-      onComplete: (fullResponse) => {
-        const aiMessage: ChatMessage = {
-          id: Date.now().toString(),
-          role: "assistant",
-          content: fullResponse,
-          model: "llama-4-scout-17b",
-        };
-        setMessages((prev) => [...prev, aiMessage]);
-        setStreamingContent("");
+    // CRITICAL: Use RAG query if PDF is uploaded, otherwise use normal chat
+    if (activePdf) {
+      console.log("📎 [CONV] Using RAG query with index:", activePdf.indexName);
 
-        // Save AI response to storage
-        addMessageToThread(id as string, {
-          id: aiMessage.id,
-          role: aiMessage.role,
-          content: aiMessage.content,
-          model: aiMessage.model,
-        });
-      },
-      onError: (error) => {
-        console.error("Chat error:", error);
-        const errorMessage: ChatMessage = {
-          id: Date.now().toString(),
-          role: "assistant",
-          content: `Error: ${error.message}`,
-          model: "error",
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-        setStreamingContent("");
-      },
-    });
+      await ragQuery.query(message, {
+        indexName: activePdf.indexName,
+        onChunk: (content) => {
+          flushSync(() => {
+            setStreamingContent((prev) => prev + content);
+          });
+        },
+        onComplete: (fullResponse, sources) => {
+          console.log("📎 [CONV] RAG response complete. Sources:", sources);
+          const aiMessage: ChatMessage = {
+            id: Date.now().toString(),
+            role: "assistant",
+            content: fullResponse,
+            model: "rag-llama-4-scout-17b",
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setStreamingContent("");
+
+          // Save AI response to storage
+          addMessageToThread(id as string, {
+            id: aiMessage.id,
+            role: aiMessage.role,
+            content: aiMessage.content,
+            model: aiMessage.model,
+          });
+        },
+        onError: (error) => {
+          console.error("📎 [CONV] RAG error:", error);
+          const errorMessage: ChatMessage = {
+            id: Date.now().toString(),
+            role: "assistant",
+            content: `RAG Error: ${error.message}`,
+            model: "error",
+          };
+          setMessages((prev) => [...prev, errorMessage]);
+          setStreamingContent("");
+        },
+      });
+    } else {
+      console.log("💬 [CONV] Using normal chat (no PDF)");
+
+      await chat.sendMessage(message, {
+        conversationHistory: messages.map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+        onChunk: (content) => {
+          flushSync(() => {
+            setStreamingContent((prev) => prev + content);
+          });
+        },
+        onComplete: (fullResponse) => {
+          const aiMessage: ChatMessage = {
+            id: Date.now().toString(),
+            role: "assistant",
+            content: fullResponse,
+            model: "llama-4-scout-17b",
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setStreamingContent("");
+
+          // Save AI response to storage
+          addMessageToThread(id as string, {
+            id: aiMessage.id,
+            role: aiMessage.role,
+            content: aiMessage.content,
+            model: aiMessage.model,
+          });
+        },
+        onError: (error) => {
+          console.error("💬 [CONV] Chat error:", error);
+          const errorMessage: ChatMessage = {
+            id: Date.now().toString(),
+            role: "assistant",
+            content: `Error: ${error.message}`,
+            model: "error",
+          };
+          setMessages((prev) => [...prev, errorMessage]);
+          setStreamingContent("");
+        },
+      });
+    }
   };
 
   const handleVideoRegenerate = () => {
@@ -256,6 +321,8 @@ export default function ChatConversation() {
         videoEnabled={videoEnabled}
         onVideoToggle={setVideoEnabled}
         enableVideoLayout={true}
+        uploadedPdfInfo={uploadedPdf}
+        onPdfUpload={setUploadedPdf}
       />
       <div className="absolute inset-0 flex">
         {/* Chat Area */}
@@ -281,16 +348,16 @@ export default function ChatConversation() {
                 model={message.model}
               />
             ))}
-            {chat.isStreaming && streamingContent && (
+            {(chat.isStreaming || ragQuery.isStreaming) && streamingContent && (
               <Message
                 key="streaming"
                 message={streamingContent}
                 messageId="streaming"
                 role="assistant"
-                model="llama-4-scout-17b"
+                model={uploadedPdf ? `rag-${uploadedPdf.indexName}` : "llama-4-scout-17b"}
               />
             )}
-            {chat.isStreaming && !streamingContent && <TypingIndicator />}
+            {(chat.isStreaming || ragQuery.isStreaming) && !streamingContent && <TypingIndicator />}
           </div>
         </div>
 

@@ -239,6 +239,25 @@ export function useManimGeneration() {
 }
 
 /**
+ * Generate a unique index name for each PDF upload
+ * Format: pdf-{sanitized-filename}-{timestamp}
+ */
+function generateIndexName(file: File): string {
+  // Sanitize filename: remove extension, convert to lowercase, replace non-alphanumeric
+  const sanitized = file.name
+    .replace(/\.pdf$/i, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") // Remove leading/trailing hyphens
+    .slice(0, 40); // Limit length for Pinecone
+
+  // Add timestamp for uniqueness
+  const timestamp = Date.now().toString(36);
+
+  return `pdf-${sanitized}-${timestamp}`;
+}
+
+/**
  * Hook for RAG PDF upload
  */
 export function useRAGUpload() {
@@ -246,11 +265,14 @@ export function useRAGUpload() {
     mutationFn: async (data: { file: File; indexName?: string }) => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+      // ALWAYS generate a unique index name for each upload
+      const indexName = data.indexName || generateIndexName(data.file);
+
+      console.log(`📤 Uploading ${data.file.name} to index: ${indexName}`);
+
       const formData = new FormData();
       formData.append("file", data.file);
-      if (data.indexName) {
-        formData.append("index_name", data.indexName);
-      }
+      formData.append("index_name", indexName);
 
       const response = await fetch(`${apiUrl}/rag/upload`, {
         method: "POST",

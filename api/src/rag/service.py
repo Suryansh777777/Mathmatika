@@ -4,12 +4,11 @@ Core RAG service for PDF processing and question answering.
 
 import os
 import json
-import uuid
 from typing import AsyncGenerator
 from pathlib import Path
 
 from pinecone import Pinecone, ServerlessSpec
-from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
@@ -65,14 +64,11 @@ class RAGService:
                 )
             )
 
-    async def process_pdf(self, file_path: str, filename: str, index_name: str = None) -> PDFUploadResponse:
+    async def process_pdf(self, file_path: str, filename: str, index_name: str = "pdf-index") -> PDFUploadResponse:
         """Process PDF and upload to Pinecone."""
-        if index_name is None:
-            index_name = f"pdf-index-{uuid.uuid4()}"
-
         try:
             # Load PDF
-            loader = PyMuPDFLoader(file_path)
+            loader = PyPDFLoader(file_path)
             documents = loader.load()
 
             # Split into chunks

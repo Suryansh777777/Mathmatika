@@ -6,7 +6,7 @@ import { Icon } from "@/components/icon";
 import { IconType } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "usehooks-ts";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 const promptSuggestions: Record<string, { title: string; icon: IconType; prompts: string[] }> = {
@@ -56,6 +56,12 @@ export default function ChatHome() {
   const router = useRouter();
   const [_, setDraft] = useLocalStorage<string>(DRAFT_KEY, "");
   const [input, setInput] = useState("");
+  const [uploadedPdf, setUploadedPdf] = useState<{filename: string; indexName: string} | null>(null);
+
+  const handlePdfUpload = useCallback((info: {filename: string; indexName: string} | null) => {
+    console.log("🏠 Home page - PDF upload:", info);
+    setUploadedPdf(info);
+  }, []);
 
   const handlePromptClick = (prompt: string) => {
     setInput(prompt);
@@ -67,6 +73,11 @@ export default function ChatHome() {
     const threadId = Date.now().toString();
     // Store the message so the chat page can pick it up
     sessionStorage.setItem(`chat-initial-${threadId}`, message);
+    // Store PDF info if available - CRITICAL: must persist for RAG queries
+    if (uploadedPdf) {
+      console.log("📎 [HOME] Storing PDF info for thread:", threadId, uploadedPdf);
+      sessionStorage.setItem(`chat-pdf-${threadId}`, JSON.stringify(uploadedPdf));
+    }
     router.push(`/chat/${threadId}`);
   };
 
@@ -76,6 +87,8 @@ export default function ChatHome() {
         input={input}
         setInput={setInput}
         append={handleAppend}
+        uploadedPdfInfo={uploadedPdf}
+        onPdfUpload={handlePdfUpload}
       />
       <div className="absolute inset-0 overflow-y-scroll sm:pt-3.5 pb-[144px] smooth-scroll" style={{ scrollbarGutter: "stable both-edges" }}>
         <div role="log" aria-label="Chat messages" aria-live="polite" className="mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 py-10">
