@@ -20,6 +20,7 @@ dependencies = [
     "langchain-community>=0.3.30",
     "langchain-pinecone>=0.2.12",
     "pypdf>=6.1.1",
+    "pymupdf>=1.24.1",
     "sentence-transformers>=5.1.1",
     "langchain-huggingface>=0.3.1",
     "openai>=1.0.0",
