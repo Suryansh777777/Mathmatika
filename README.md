@@ -40,11 +40,12 @@ Enable students to learn mathematics more effectively by providing AI-powered co
 
 ## Features
 
-### 🔬 AI Research Modes
+### 💬 Interactive Chat
 
-- **Basic Research**: Quick web search + AI synthesis (5 sources, 2-3 sentence summary + 3 insights)
-- **Deep Research**: Two-layer research with follow-up queries (6 + 4 sources)
-- **Multi-Agent Research**: Anthropic-style parallel task decomposition and synthesis
+- Real-time conversational AI interface
+- LaTeX equation rendering with KaTeX
+- Markdown support with syntax highlighting
+- Streaming responses for better UX
 
 ### 📚 RAG (Retrieval-Augmented Generation)
 
@@ -52,13 +53,6 @@ Enable students to learn mathematics more effectively by providing AI-powered co
 - Pinecone vector database integration
 - Semantic search with HuggingFace embeddings
 - Context-aware question answering
-
-### 💬 Interactive Chat
-
-- Real-time conversational AI interface
-- LaTeX equation rendering with KaTeX
-- Markdown support with syntax highlighting
-- Streaming responses for better UX
 
 ### 🎬 Video Generation
 
