@@ -36,7 +36,7 @@ export function Logo() {
       <h1 className="flex h-8 shrink-0 items-center justify-center text-lg text-muted-foreground transition-opacity delay-75 duration-75">
         <Link
           className="relative flex h-8 w-full items-center justify-center text-sm font-semibold text-foreground"
-          href="/chat"
+          href="/"
         >
           <div className=" select-none flex flex-col justify-center text-[#2F3037] text-sm sm:text-base md:text-lg lg:text-xl font-medium leading-5 font-sans">
             {name}

@@ -17,7 +17,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
-import { useChatStream, useManimGeneration, type ChatMessage } from "@/lib/api/hooks";
+import { useChatStream, useManimGeneration } from "@/lib/api/hooks";
 import { Message } from "@/components/chat/message";
 import { VideoPanel, type VideoState, type VideoQuality } from "@/components/chat/video-panel";
 

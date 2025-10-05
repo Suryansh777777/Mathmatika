@@ -40,14 +40,14 @@ function VoiceWidgetDialog({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
       transition={motionTransition}
-      className="relative bg-[#fdfcfb] rounded-[24px] border border-[#8b7d70]/20 p-6 sm:p-8 max-w-md w-full mx-auto shadow-xl overflow-hidden"
+      className="relative bg-[#fdfcfb] rounded-2xl sm:rounded-[24px] border border-[#8b7d70]/20 p-4 sm:p-6 md:p-8 w-[calc(100vw-2rem)] sm:w-[90vw] sm:max-w-md mx-auto shadow-xl overflow-hidden max-h-[90vh] sm:max-h-none overflow-y-auto"
       role="dialog"
       aria-modal="true"
     >
       <VoiceWidgetHeader onClose={onClose} />
 
       <div className="text-center">
-        <div className="w-28 h-28 sm:w-32 sm:h-32 mx-auto mb-6 relative">
+        <div className="w-24 h-24 xs:w-28 xs:h-28 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 relative">
           <AIOrb status={orbStatus} size={128} />
         </div>
 

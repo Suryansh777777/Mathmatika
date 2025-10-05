@@ -1,10 +1,9 @@
 "use client";
 
 import { memo } from "react";
-import type { VoiceStatus as VoiceStatusType } from "@/lib/voice/types";
 
 interface VoiceStatusProps {
-  status: VoiceStatusType;
+  status: string;
   error?: string;
 }
 
@@ -17,7 +16,7 @@ function VoiceStatus({ status, error }: VoiceStatusProps) {
     );
   }
 
-  const statusMessages: Record<VoiceStatusType, string> = {
+  const statusMessages: Record<string, string> = {
     idle: "Ready to connect",
     connecting: "Connecting to voice assistant...",
     connected: "Connected - Start speaking",
@@ -26,7 +25,7 @@ function VoiceStatus({ status, error }: VoiceStatusProps) {
     error: "Connection error",
   };
 
-  const statusColors: Record<VoiceStatusType, string> = {
+  const statusColors: Record<string, string> = {
     idle: "text-gray-500",
     connecting: "text-blue-500",
     connected: "text-green-500",

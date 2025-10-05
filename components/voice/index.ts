@@ -1,4 +1,3 @@
-export { default as VoicePanel } from "./VoicePanel";
 export { default as VoiceControls } from "./VoiceControls";
 export { default as VoiceStatus } from "./VoiceStatus";
 export { default as VoiceWidget } from "./VoiceWidget";

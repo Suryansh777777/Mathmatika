@@ -1,12 +1,15 @@
-"use client"
+"use client";
 
-import { siteConfig } from "@/config/siteConfig"
+import { siteConfig } from "@/config/siteConfig";
 
 export function CTA() {
-  const { cta } = siteConfig
+  const { cta } = siteConfig;
 
   return (
-    <div className="w-full relative overflow-hidden flex flex-col justify-center items-center gap-2">
+    <div
+      className="w-full relative overflow-hidden flex flex-col justify-center items-center gap-2"
+      id="CTA"
+    >
       <div className="self-stretch px-6 md:px-24 py-12 md:py-12 border-t border-b border-[rgba(55,50,47,0.12)] flex justify-center items-center gap-6 relative z-10">
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           <div className="w-full h-full relative">
@@ -51,5 +54,5 @@ export function CTA() {
         </div>
       </div>
     </div>
-  )
+  );
 }

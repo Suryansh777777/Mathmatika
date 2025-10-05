@@ -11,7 +11,7 @@ export default function VoiceWidget() {
   const [muted, setMuted] = useState(false);
   const [state, setState] = useState<WidgetState>("collapsed");
   const [connected, setConnected] = useState(false);
-  const [volume, setVolume] = useState(0);
+  const [volume] = useState(0);
 
   // Simulate connection process (replace with actual LiveKit connection later)
   const connect = useCallback(() => {

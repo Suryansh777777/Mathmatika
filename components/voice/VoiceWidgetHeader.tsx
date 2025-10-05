@@ -15,13 +15,6 @@ function VoiceWidgetHeader({ onClose }: VoiceWidgetHeaderProps) {
       >
         <X className="w-5 h-5" />
       </button>
-
-      <div className="flex items-center justify-center gap-3 mb-6">
-        <div className="w-4 h-4 bg-[#8b7d70] rounded-full"></div>
-        <h2 className="text-xl font-bold text-[#37322f]">
-          AI Math Mentor
-        </h2>
-      </div>
     </>
   );
 }

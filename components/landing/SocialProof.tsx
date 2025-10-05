@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { siteConfig } from "@/config/siteConfig"
 import { Badge } from "@/components/shared/Badge"
 
@@ -81,7 +82,7 @@ export function SocialProof() {
                 `}
               >
                 <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 relative shadow-[0px_-4px_8px_rgba(255,255,255,0.64)_inset] overflow-hidden rounded-full">
-                  <img src={logo.icon} alt={logo.name} className="w-full h-full object-contain" />
+                  <Image src={logo.icon} alt={logo.name} width={40} height={40} className="w-full h-full object-contain" />
                 </div>
                 <div className="text-center flex justify-center flex-col text-[#37322F] text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-medium leading-tight md:leading-9 font-sans">
                   {logo.name}

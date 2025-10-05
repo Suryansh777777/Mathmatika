@@ -17,22 +17,33 @@ export function Navigation() {
               {name}
             </div>
           </Link>
-          <div className="pl-3 sm:pl-4 md:pl-5 lg:pl-5  justify-start items-start hidden sm:flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-4">
+          <div className="pl-3 sm:pl-4 md:pl-5 lg:pl-5 justify-start items-start hidden sm:flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-4">
             {nav.links.map((link) => (
-              <div key={link.name} className="flex justify-start items-center">
-                <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] text-xs md:text-[13px] font-medium leading-[14px] font-sans">
+              <a
+                key={link.name}
+                href={link.href}
+                className="flex justify-start items-center group"
+                onClick={(e) => {
+                  if (link.href.startsWith('#')) {
+                    e.preventDefault();
+                    const element = document.querySelector(link.href);
+                    element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+              >
+                <div className="flex flex-col justify-center text-[rgba(49,45,43,0.80)] group-hover:text-[#37322F] text-xs md:text-[13px] font-medium leading-[14px] font-sans transition-colors duration-200 cursor-pointer">
                   {link.name}
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>
         <Link
           href={nav.cta.href}
-          className="h-6 sm:h-7 md:h-8 flex justify-start items-start gap-2 sm:gap-3"
+          className="h-6 sm:h-7 md:h-8 flex justify-start items-start gap-2 sm:gap-3 group"
         >
-          <div className="px-2 sm:px-3 md:px-[14px] py-1 sm:py-[6px] bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] overflow-hidden rounded-full flex justify-center items-center">
-            <div className="flex flex-col justify-center text-[#37322F] text-xs md:text-[13px] font-medium leading-5 font-sans">
+          <div className="px-2 sm:px-3 md:px-[14px] py-1 sm:py-[6px] bg-white shadow-[0px_1px_2px_rgba(55,50,47,0.12)] group-hover:shadow-[0px_2px_4px_rgba(55,50,47,0.16)] overflow-hidden rounded-full flex justify-center items-center transition-all duration-200 group-hover:scale-105">
+            <div className="flex flex-col justify-center text-[#37322F] group-hover:text-[#2F3037] text-xs md:text-[13px] font-medium leading-5 font-sans transition-colors duration-200">
               {nav.cta.text}
             </div>
           </div>

@@ -27,13 +27,6 @@ interface ChatPromptProps {
   onPdfUpload?: (info: { filename: string; indexName: string } | null) => void;
 }
 
-const modelRegistry = {
-  "gpt-4": { provider: "openai", modelId: "gpt-4" },
-  "gpt-4o": { provider: "openai", modelId: "gpt-4o" },
-  "claude-3.5": { provider: "anthropic", modelId: "claude-3-5-sonnet" },
-  "gemini-2.0": { provider: "google", modelId: "gemini-2.0-flash" },
-};
-
 export default function ChatPrompt({
   input,
   setInput,
@@ -59,6 +52,7 @@ export default function ChatPrompt({
       );
       textareaRef.current.style.height = `${newHeight}px`;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -192,7 +186,7 @@ const UploadButton = ({
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.name.toLowerCase().endsWith('.pdf')) {
+      if (!file.name.toLowerCase().endsWith(".pdf")) {
         toast({
           title: "Invalid file type",
           description: "Please select a PDF file",
@@ -239,7 +233,7 @@ const UploadButton = ({
           setSelectedFile(null);
           setOpen(false);
           if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+            fileInputRef.current.value = "";
           }
         },
         onError: (error) => {
@@ -283,69 +277,143 @@ const UploadButton = ({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 rounded-lg bg-background p-4 text-popover-foreground shadow-xl">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <h3 className="text-sm font-semibold text-foreground">Upload PDF</h3>
-            <p className="text-xs text-muted-foreground">
-              Upload a PDF document to enable RAG-powered Q&A
-            </p>
+      <PopoverContent className="w-96 rounded-xl bg-white border border-[#e8e4df] p-0 shadow-[0px_8px_16px_rgba(55,50,47,0.12)] overflow-hidden">
+        <div className="flex flex-col">
+          {/* Header */}
+          <div className="px-5 py-4 border-b border-[#e8e4df] bg-gradient-to-b from-[#fdfcfb] to-white">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#37322f] to-[#5a5550] flex items-center justify-center shadow-sm">
+                <Icon name="media" className="!size-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-[#37322f]">
+                  Upload PDF Document
+                </h3>
+                <p className="text-xs text-[#8b7d70] mt-0.5">
+                  Enable RAG-powered Q&A with your documents
+                </p>
+              </div>
+            </div>
           </div>
 
-          {isPdfAttached ? (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2 rounded-md bg-green-500/10 border border-green-500/20 p-3">
-                <Icon name="media" className="!size-4 text-green-600" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-green-700 truncate">
-                    {uploadedPdfInfo.filename}
-                  </p>
-                  <p className="text-xs text-green-600/80">
-                    Index: {uploadedPdfInfo.indexName}
-                  </p>
+          {/* Content */}
+          <div className="p-5">
+            {isPdfAttached ? (
+              <div className="flex flex-col gap-4">
+                {/* Attached File Card */}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+                  <div className="relative flex items-center gap-3 rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200/50 p-4 shadow-sm">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md">
+                      <Icon name="media" className="!size-6 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-emerald-900 truncate mb-0.5">
+                        {uploadedPdfInfo.filename}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                          Ready
+                        </span>
+                        <span className="text-xs text-emerald-600/70">
+                          {uploadedPdfInfo.indexName}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Remove Button */}
+                <Button
+                  onClick={handleRemovePdf}
+                  variant="outline"
+                  className="w-full h-10 border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 font-medium rounded-lg transition-all duration-200"
+                  size="sm"
+                >
+                  <span className="mr-2">🗑️</span>
+                  Remove Document
+                </Button>
               </div>
-              <Button
-                onClick={handleRemovePdf}
-                variant="outline"
-                className="w-full text-xs border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                size="sm"
-              >
-                Remove PDF
-              </Button>
-            </div>
-          ) : (
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                onChange={handleFileSelect}
-                className="text-xs text-muted-foreground file:mr-4 file:rounded-md file:border-0 file:bg-[#37322f] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-[#4a443f] file:transition-colors"
-              />
-
-              {selectedFile && (
-                <div className="flex items-center gap-2 rounded-md bg-muted/30 p-2">
-                  <Icon name="media" className="!size-4 text-muted-foreground" />
-                  <span className="text-xs text-foreground truncate flex-1">
-                    {selectedFile.name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                  </span>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {/* Upload Area */}
+                <div className="relative">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="pdf-upload-input"
+                  />
+                  <label
+                    htmlFor="pdf-upload-input"
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#d4cfc8] rounded-xl bg-gradient-to-b from-[#fdfcfb] to-[#f7f5f3] hover:border-[#37322f]/30 hover:bg-[#fdfcfb] cursor-pointer transition-all duration-200 group"
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-12 h-12 rounded-full bg-[#37322f]/5 group-hover:bg-[#37322f]/10 flex items-center justify-center transition-colors duration-200">
+                        <Icon
+                          name="media"
+                          className="!size-6 text-[#37322f] group-hover:scale-110 transition-transform duration-200"
+                        />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-[#37322f] group-hover:text-[#2F3037]">
+                          Click to browse files
+                        </p>
+                        <p className="text-xs text-[#8b7d70] mt-0.5">
+                          or drag and drop your PDF here
+                        </p>
+                      </div>
+                    </div>
+                  </label>
                 </div>
-              )}
 
-              <Button
-                onClick={handleUpload}
-                disabled={!selectedFile || upload.isPending}
-                className="w-full bg-[#37322f] hover:bg-[#4a443f] text-white"
-                size="sm"
-              >
-                {upload.isPending ? "Uploading..." : "Upload"}
-              </Button>
-            </>
-          )}
+                {/* Selected File Preview */}
+                {selectedFile && (
+                  <div className="animate-slide-up">
+                    <div className="flex items-center gap-3 rounded-lg bg-[#f7f5f3] border border-[#e8e4df] p-3 shadow-sm">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#37322f] to-[#5a5550] flex items-center justify-center shadow-sm">
+                        <Icon name="media" className="!size-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[#37322f] truncate">
+                          {selectedFile.name}
+                        </p>
+                        <p className="text-xs text-[#8b7d70] mt-0.5">
+                          {(selectedFile.size / 1024 / 1024).toFixed(2)} MB •
+                          PDF Document
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload Button */}
+                <Button
+                  onClick={handleUpload}
+                  disabled={!selectedFile || upload.isPending}
+                  className="w-full h-11 bg-gradient-to-r from-[#37322f] to-[#4a443f] hover:from-[#4a443f] hover:to-[#37322f] text-white font-semibold rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  size="sm"
+                >
+                  {upload.isPending ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Uploading...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span>📤</span>
+                      <span>Upload Document</span>
+                    </div>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </PopoverContent>
     </Popover>
@@ -367,48 +435,23 @@ const PromptActions = ({
   uploadedPdfInfo?: { filename: string; indexName: string } | null;
   onPdfUpload?: (info: { filename: string; indexName: string } | null) => void;
 }) => {
-  const handleClick = (key: string) => {
-    setModel(key);
-  };
-
   return (
     <div className="flex flex-col gap-2 pr-2 sm:flex-row sm:items-center">
       <div className="ml-[-7px] flex items-center gap-1">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              type="button"
-              className="h-8 text-xs gap-2 px-2 py-1.5 -mb-2 text-[#5a5550]"
-            >
-              {model}
-              <Icon name="models" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-52 rounded-lg bg-background p-4 text-popover-foreground shadow-xl">
-            <div className="flex flex-col gap-2">
-              {Object.keys(modelRegistry).map((key) => (
-                <Button
-                  variant="ghost"
-                  key={key}
-                  className="flex items-center gap-2"
-                  onClick={() => handleClick(key)}
-                >
-                  <span className="text-sm">{key}</span>
-                </Button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
-        <Button
-          type="button"
-          variant="outline"
-          className="text-xs -mb-1.5 h-auto gap-2 rounded-full border border-solid border-[#8b7d70]/10 py-1.5 pl-2 pr-2.5 text-[#5a5550] max-sm:p-2 hover:border-[#8b7d70]/30 hover:shadow-sm transition-all duration-200"
-        >
-          <Icon name="web" />
-          Search
-        </Button>
-        <UploadButton uploadedPdfInfo={uploadedPdfInfo} onPdfUpload={onPdfUpload} />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            type="button"
+            className="h-8 text-xs gap-2 px-2 py-1.5 -mb-2 text-[#5a5550]"
+          >
+            Llama 4
+          </Button>
+        </div>
+
+        <UploadButton
+          uploadedPdfInfo={uploadedPdfInfo}
+          onPdfUpload={onPdfUpload}
+        />
         <Button
           variant="outline"
           type="button"

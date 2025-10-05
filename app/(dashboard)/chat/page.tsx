@@ -9,7 +9,10 @@ import { useLocalStorage } from "usehooks-ts";
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-const promptSuggestions: Record<string, { title: string; icon: IconType; prompts: string[] }> = {
+const promptSuggestions: Record<
+  string,
+  { title: string; icon: IconType; prompts: string[] }
+> = {
   create: {
     title: "Create",
     icon: "create",
@@ -18,7 +21,7 @@ const promptSuggestions: Record<string, { title: string; icon: IconType; prompts
       "Create a step-by-step guide for integration by parts",
       "Design a visual proof of the Pythagorean theorem",
       "Build a study schedule for calculus exam prep",
-    ]
+    ],
   },
   explore: {
     title: "Explore",
@@ -28,7 +31,7 @@ const promptSuggestions: Record<string, { title: string; icon: IconType; prompts
       "History of calculus and its impact on science",
       "Most beautiful mathematical theorems",
       "How does number theory relate to cryptography?",
-    ]
+    ],
   },
   code: {
     title: "Code",
@@ -38,7 +41,7 @@ const promptSuggestions: Record<string, { title: string; icon: IconType; prompts
       "Implement the Euclidean algorithm in JavaScript",
       "Create a matrix multiplication function",
       "Code a numerical derivative calculator",
-    ]
+    ],
   },
   learn: {
     title: "Learn",
@@ -48,20 +51,26 @@ const promptSuggestions: Record<string, { title: string; icon: IconType; prompts
       "What is the fundamental theorem of calculus?",
       "Beginner's guide to trigonometric identities",
       "How do logarithms work?",
-    ]
-  }
+    ],
+  },
 };
 
 export default function ChatHome() {
   const router = useRouter();
-  const [_, setDraft] = useLocalStorage<string>(DRAFT_KEY, "");
+  const [, setDraft] = useLocalStorage<string>(DRAFT_KEY, "");
   const [input, setInput] = useState("");
-  const [uploadedPdf, setUploadedPdf] = useState<{filename: string; indexName: string} | null>(null);
+  const [uploadedPdf, setUploadedPdf] = useState<{
+    filename: string;
+    indexName: string;
+  } | null>(null);
 
-  const handlePdfUpload = useCallback((info: {filename: string; indexName: string} | null) => {
-    console.log("🏠 Home page - PDF upload:", info);
-    setUploadedPdf(info);
-  }, []);
+  const handlePdfUpload = useCallback(
+    (info: { filename: string; indexName: string } | null) => {
+      console.log("🏠 Home page - PDF upload:", info);
+      setUploadedPdf(info);
+    },
+    []
+  );
 
   const handlePromptClick = (prompt: string) => {
     setInput(prompt);
@@ -75,8 +84,15 @@ export default function ChatHome() {
     sessionStorage.setItem(`chat-initial-${threadId}`, message);
     // Store PDF info if available - CRITICAL: must persist for RAG queries
     if (uploadedPdf) {
-      console.log("📎 [HOME] Storing PDF info for thread:", threadId, uploadedPdf);
-      sessionStorage.setItem(`chat-pdf-${threadId}`, JSON.stringify(uploadedPdf));
+      console.log(
+        "📎 [HOME] Storing PDF info for thread:",
+        threadId,
+        uploadedPdf
+      );
+      sessionStorage.setItem(
+        `chat-pdf-${threadId}`,
+        JSON.stringify(uploadedPdf)
+      );
     }
     router.push(`/chat/${threadId}`);
   };
@@ -90,13 +106,20 @@ export default function ChatHome() {
         uploadedPdfInfo={uploadedPdf}
         onPdfUpload={handlePdfUpload}
       />
-      <div className="absolute inset-0 overflow-y-scroll sm:pt-3.5 pb-[144px] smooth-scroll" style={{ scrollbarGutter: "stable both-edges" }}>
-        <div role="log" aria-label="Chat messages" aria-live="polite" className="mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 py-10">
-          <div className="flex h-[calc(100vh-20rem)] items-start justify-center">
+      <div
+        className="absolute inset-0 overflow-y-scroll sm:pt-3.5 pb-[144px] smooth-scroll"
+        style={{ scrollbarGutter: "stable both-edges" }}
+      >
+        <div
+          role="log"
+          aria-label="Chat messages"
+          aria-live="polite"
+          className="mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 py-10"
+        >
+          <div className="flex h-[calc(100vh-20rem)] items-start justify-center ">
             <div
               className={cn(
-                "w-full space-y-6 px-2 pt-[calc(max(15vh,2.5rem))] duration-300 animate-in fade-in-50 zoom-in-95 sm:px-8",
-                input.length && "pointer-events-none opacity-0 animate-out fade-out-0 zoom-out-105"
+                "w-full space-y-6 px-2 pt-[calc(max(15vh,2.5rem))] duration-300 animate-in fade-in-50 zoom-in-95 sm:px-8"
               )}
             >
               <h2 className="text-3xl font-semibold text-[#37322f] animate-slide-up">
@@ -109,7 +132,10 @@ export default function ChatHome() {
                 <TabsList className="gap-2.5 text-sm max-sm:justify-evenly bg-transparent p-0">
                   {Object.keys(promptSuggestions).map((key) => (
                     <TabsTrigger key={key} value={key}>
-                      <Icon name={promptSuggestions[key].icon} className="max-sm:block" />
+                      <Icon
+                        name={promptSuggestions[key].icon}
+                        className="max-sm:block"
+                      />
                       {promptSuggestions[key].title}
                     </TabsTrigger>
                   ))}
@@ -126,7 +152,9 @@ export default function ChatHome() {
                           onMouseDown={() => handlePromptClick(prompt)}
                           className="w-full rounded-md py-2.5 px-3 text-left text-[#5a5550] hover:bg-[#e8e4df]/50 cursor-pointer transition-all duration-150 group relative overflow-hidden"
                         >
-                          <span className="group-hover:text-[#37322f] transition-colors duration-150 relative z-10">{prompt}</span>
+                          <span className="group-hover:text-[#37322f] transition-colors duration-150 relative z-10">
+                            {prompt}
+                          </span>
                           <div className="absolute inset-y-0 left-0 w-1 bg-[#37322f] scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></div>
                         </button>
                       </div>

@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/icon";
 import { useState, useRef, useEffect } from "react";
-import { cn } from "@/lib/utils";
 
 export type VideoQuality = "low" | "medium" | "high";
 
@@ -16,16 +15,14 @@ export interface VideoState {
 
 interface VideoPanelProps {
   videoState: VideoState;
-  quality: VideoQuality;
-  onQualityChange: (quality: VideoQuality) => void;
+  quality?: VideoQuality;
+  onQualityChange?: (quality: VideoQuality) => void;
   onRegenerate?: () => void;
   onClose?: () => void;
 }
 
 export function VideoPanel({
   videoState,
-  quality,
-  onQualityChange,
   onRegenerate,
   onClose,
 }: VideoPanelProps) {

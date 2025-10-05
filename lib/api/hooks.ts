@@ -11,6 +11,15 @@ export interface ChatMessage {
 }
 
 /**
+ * RAG source document type
+ */
+export interface RAGSource {
+  content: string;
+  metadata?: Record<string, unknown>;
+  score?: number;
+}
+
+/**
  * Hook for streaming chat with conversation history
  *
  * @example
@@ -305,7 +314,7 @@ export function useRAGQuery() {
       options?: {
         indexName?: string;
         onChunk?: (content: string) => void;
-        onComplete?: (fullResponse: string, sources: any[]) => void;
+        onComplete?: (fullResponse: string, sources: RAGSource[]) => void;
         onError?: (error: Error) => void;
       }
     ) => {
@@ -313,7 +322,7 @@ export function useRAGQuery() {
       setError(null);
 
       let fullResponse = "";
-      let sources: any[] = [];
+      let sources: RAGSource[] = [];
       abortControllerRef.current = new AbortController();
 
       try {

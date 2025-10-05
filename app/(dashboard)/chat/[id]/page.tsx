@@ -131,6 +131,7 @@ export default function ChatConversation() {
       // Reset video state when toggling off
       setVideoState({ status: "idle" });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoEnabled]);
 
   const handleAppend = async (

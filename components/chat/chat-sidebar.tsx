@@ -3,13 +3,11 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/chat/logo";
 import ThreadList from "@/components/chat/thread-list";
-import UserProfile from "@/components/chat/user-profile";
 import { Icon } from "@/components/icon";
 import { useState } from "react";
 import { XIcon } from "lucide-react";
@@ -47,9 +45,7 @@ export default function ChatSidebar() {
       <SidebarContent className="small-scrollbar scroll-shadow relative px-2 py-3">
         <ThreadList searchQuery={searchQuery} />
       </SidebarContent>
-      <SidebarFooter className="border-t border-[#d4cfc8]/30 p-2 mt-auto bg-[#fdfcfb]/50 backdrop-blur-sm">
-        <UserProfile />
-      </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
