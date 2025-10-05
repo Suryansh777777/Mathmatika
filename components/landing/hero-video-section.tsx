@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
 export function HeroVideoSection() {
-  const videoId = "";
+  const videoId = "tDRjmjhuMfg";
   const [isMuted, setIsMuted] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -35,14 +35,7 @@ export function HeroVideoSection() {
       mute: "1",
       loop: "1",
       playlist: videoId,
-      controls: "0",
-      rel: "0",
-      modestbranding: "1",
-      playsinline: "1",
-      showinfo: "0",
-      iv_load_policy: "3",
-      enablejsapi: "1",
-      fs: "0",
+
       origin: window.location.origin,
     });
     setVideoSrc(`${base}?${params.toString()}`);
@@ -100,7 +93,7 @@ export function HeroVideoSection() {
             title="Hero Video"
             allow="autoplay; encrypted-media; picture-in-picture"
             allowFullScreen
-            style={{ pointerEvents: "none" }}
+            style={{ pointerEvents: "auto" }}
             onLoad={() => setIsVideoLoaded(true)}
           />
 
@@ -111,17 +104,7 @@ export function HeroVideoSection() {
                 ? "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100"
                 : "opacity-0 pointer-events-none"
             }`}
-          >
-            <div className="flex size-16 sm:size-28 items-center justify-center rounded-full bg-gradient-to-t from-secondary/20 to-[#ACC3F7/15] backdrop-blur-md transition-colors duration-500 ease-out">
-              <div className="relative flex size-12 sm:size-20 items-center justify-center rounded-full bg-gradient-to-t from-secondary to-white/10 shadow-md transform-gpu transition-transform duration-300 ease-out group-hover:scale-110 group-active:scale-95">
-                {isMuted ? (
-                  <Volume2 className="size-4 sm:size-8 fill-white text-white" />
-                ) : (
-                  <VolumeX className="size-4 sm:size-8 fill-white text-white" />
-                )}
-              </div>
-            </div>
-          </div>
+          ></div>
 
           {/* Mobile-specific mute indicator - always visible when muted */}
           {/* <div
