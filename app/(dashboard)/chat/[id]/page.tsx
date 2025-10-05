@@ -9,7 +9,6 @@ import {
   type VideoQuality,
 } from "@/components/chat/video-panel";
 import { useEffect, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import { useChatStream, useManimGeneration } from "@/lib/api/hooks";
 import { getThread, addMessageToThread } from "@/lib/chat-storage";
@@ -116,7 +115,7 @@ export default function ChatConversation() {
       // Reset video state when toggling off
       setVideoState({ status: "idle" });
     }
-  }, [videoEnabled]);
+  }, [lastUserMessage, manimGeneration, videoEnabled, videoQuality, videoState.status]);
 
   const handleAppend = async (message: string) => {
     if (!id) {
@@ -180,9 +179,7 @@ export default function ChatConversation() {
         content: msg.content,
       })),
       onChunk: (content) => {
-        flushSync(() => {
           setStreamingContent((prev) => prev + content);
-        });
       },
       onComplete: (fullResponse) => {
         const aiMessage: ChatMessage = {
